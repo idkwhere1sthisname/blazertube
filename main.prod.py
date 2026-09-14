@@ -174,10 +174,10 @@ if __name__ == "__main__":
         elif maint and str(servers.get(choice)).lower().strip() != "youtube":
             print(f"{Fore.RED}Maintenance mode is enabled, but it doesn't have any effect on the {str(servers.get(choice)).lower().strip()} server.")
         if servers.get(choice).lower().strip() == "youtube":
+            video.createviddir()
             print(f"{Fore.MAGENTA}[cleanup]{Fore.RESET} Starting video cleanup thread..")
             thread = threading.Thread(target=cleanup_schedule,daemon=True,name="btvidcleanupd")
             thread.start()
-            video.createviddir()
         set_external_API_url("https","lbl-api.idkwh.ct8.pl","443")
         set_version_subpath("api/ctr/GetVersion.php")
         set_versioned_xlb_subpath("api/ctr/GetVersionedXLB.php")
