@@ -8,7 +8,7 @@ $get_version = ($_GET["action_get_version"] ?? "0") === "1";
 $get_xlb = ($_GET["action_get_versioned_xlb"] ?? "0") === "1";
 $fmt = $_GET["fmt"] ?? "json";
 $pre = "public beta";
-$v   = "2.0";
+$v   = "2.5";
 if ($get_version) {
     if ($fmt == "json") {
         header("Content-Type: application/json");
