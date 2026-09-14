@@ -105,6 +105,7 @@ def loadcfg():
 if __name__ == "__main__":
     try:
         loadcfg()
+        video = GetVideo()
         colorama.init(autoreset=True)
         Fore = colorama.Fore
         clearscreen()
@@ -163,6 +164,7 @@ if __name__ == "__main__":
                     "SESSION_COOKIE_SECURE": secureserver,
                     "SESSION_COOKIE_SAMESITE": policy,
                 })
+            video.createviddir()
         elif str(servers.get(choice)).lower().strip() == "hulu plus":
             serveapp = huluapp
         elif str(servers.get(choice)).lower().strip() == "netflix":
