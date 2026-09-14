@@ -164,7 +164,6 @@ if __name__ == "__main__":
                     "SESSION_COOKIE_SECURE": secureserver,
                     "SESSION_COOKIE_SAMESITE": policy,
                 })
-            video.createviddir()
         elif str(servers.get(choice)).lower().strip() == "hulu plus":
             serveapp = huluapp
         elif str(servers.get(choice)).lower().strip() == "netflix":
@@ -178,6 +177,7 @@ if __name__ == "__main__":
             print(f"{Fore.MAGENTA}[cleanup]{Fore.RESET} Starting video cleanup thread..")
             thread = threading.Thread(target=cleanup_schedule,daemon=True,name="btvidcleanupd")
             thread.start()
+            video.createviddir()
         set_external_API_url("https","lbl-api.idkwh.ct8.pl","443")
         set_version_subpath("api/ctr/GetVersion.php")
         set_versioned_xlb_subpath("api/ctr/GetVersionedXLB.php")
