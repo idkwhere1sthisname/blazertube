@@ -9,7 +9,7 @@
         "sheet": "blazertube-unistore.t3x",
         "bg_index": 1,
         "bg_sheet": 0,
-        "revision": 17,
+        "revision": 18,
         "version": 3
     },
     "storeContent": [
@@ -68,10 +68,6 @@
                 },
                 {
                     "type":"promptMessage",
-                    "message":"Videos play smoothly on New 3DS consoles only. Do you wish to proceed?"
-                },
-                {
-                    "type":"promptMessage",
                     "message":"The service is in public beta, it may not work as expected."
                 },
                 {
@@ -99,10 +95,6 @@
                 },
                 {
                     "type":"promptMessage",
-                    "message":"Videos play smoothly on New 3DS consoles only. Do you wish to proceed?"
-                },
-                {
-                    "type":"promptMessage",
                     "message":"The service is in public beta, it may not work as expected."
                 },
                 {
@@ -127,10 +119,6 @@
                 {
                     "type":"promptMessage",
                     "message": "You will need a copy of YouTube v2096 installed."
-                },
-                {
-                    "type":"promptMessage",
-                    "message":"Videos play smoothly on New 3DS consoles only. Do you wish to proceed?"
                 },
                 {
                     "type":"promptMessage",
