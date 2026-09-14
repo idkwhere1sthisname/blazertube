@@ -1,0 +1,84 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0">
+    <title>debug reload</title>
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <script type="text/javascript">
+        function ua() {
+            document.getElementById("ua").innerText="ua: "+navigator.userAgent;
+        }
+        function getRegion(ua){const m=ua.match(/Version\/[\d.]+\.([A-Z]{2})$/);return m?m[1]:null;}
+        function j(u) {
+            location.href=j;
+        }
+        function rgn(){
+            document.getElementById("rgn").innerText="Reported region: "+getRegion(navigator.userAgent);
+        }
+    </script>
+    <style>
+        body {
+            overflow: scroll;
+        }
+    </style>
+</head>
+<body onload="document.getElementById('ua').innerText='ua: '+navigator.userAgent;rgn()">
+    <h1>debug</h1>
+    <a href="/home">home</a>&nbsp;<a href="javascript:location.reload()">reload</a>&nbsp;<button onclick="window.scrollTo(0,document.body.scrollHeight)">scroll to bottom</button><br/>
+    <br/>
+    <span id="ua"></span><br/><span id="rgn"></span>
+    <p id="flushmemDONE"></p>
+    <div id="flushMemWarn">
+        <h2><a href="javascript:if(vod&&'releaseMemory' in vod){vod.releaseMemory();document.getElementById('flushMemWarn').style.display='none';document.getElementById('flushmemDONE').innerText='Memory flushed.'}">!!!IF THE APP LAGS, FLUSH MEMORY!!! (press here or the btn)</a></h2>
+        <p>Google never bothered to add that in their JavaScript files...</p>
+    </div>
+    <h2>embedded.ctr</h2>
+    <button onclick="location.href='http://embedded.ctr/miiverse.html'">miiverse</button>
+    <button onclick="location.href='http://embedded.ctr/loading.html'">loading</button>
+    <button onclick="location.href='http://embedded.ctr/playbackctrl.html'">playbackctrl</button>
+    <button onclick="location.href='http://embedded.ctr/launcher.html'">launcher</button>
+    <button onclick="location.href='http://embedded.ctr/choice.html'">choice</button>
+    <button onclick="location.href='http://embedded.ctr/pdchoice.html'">pdchoice</button>
+    <button onclick="window.open('http://embedded.ctr/error-min.html?error=APP_NAME_99','_self')">error-min</button>
+    <button onclick="window.open('http://embedded.ctr/error.html?error=NET_20110','_self')">error</button>
+    <button onclick="location.href='http://embedded.ctr/'">embedded.ctr</button>
+    <button onclick="location.href='http://embedded.wii/launcher.html'">embedded.wii</button>
+    <button onclick="location.href='http://embedded.ctr/launcher.html?clear_local_data=1'">embedded.ctr clear data (nothing)</button>
+    <button onclick="location.href='http://10.17.96.246/?clear_local_data=1'">clear local data (/)</button>
+    <h2>js</h2>
+    <script>document.write(typeof(vod,vod))</script><br>
+    <script>document.write(vod.getMiiverseLink());</script><br>
+    <script>document.write(vod.getView());</script><br>
+    <script>document.write(vod.getView().getWindow());</script><br>
+    <script>document.write(vod.ready())</script><br>
+    <script>document.write("New 3DS?: "+vod.n3ds_IsNew3DS())</script><br>
+    <button onclick="vod.showProgressSpinner(true)">showProgressSpinner(true)</button><br/>
+    <button onclick="vod.hideSpinner(0)">vod.hideSpinner(0)</button>
+    <button onclick="vod.setMiiverseLink(1202823)">vod.setMiiverseLink</button>
+    <button onclick="vod.launchMiiverse()">launchMiiverse</button>
+    <button oncanplay="vod.showProgressSpinner(false)">showProgressSpinner(false)</button><br/>
+    <!--                                             sec, {xpos,ypos}-->
+    <button onclick="vod.showSpinnerWithoutBackground(10,{x:34,y:15})">showSpinnerWithoutBackground</button><br>
+    <button onclick="vod.releaseMemory()">vod.releaseMemory</button><br>
+    <button onclick="vod.createView('null')">vod.createView</button><br>
+    <script>document.write(vod.FlexView_InputMask_None)</script><br>
+    <script>document.write(vod.FlexView_ViewFlags_Hint_RenderQualityColorLow);</script><br>
+    <script>document.write(vod.FlexView_ViewFlags_JSB)</script><br>
+    <script>document.writeln(vod.FlexView_ViewFlags_Hidden)</script><br>
+    <script>document.writeln(vod.FlexView_ViewFlags_SupportStencil)</script><br>
+    <script>document.write(vod.FlexView_ViewFlags_TouchScrollingY)</script>;
+    <script>document.write(vod.FlexView_ViewFlags_ScrollingY)</script>
+    <p>vod.addEventListener</p>
+    <br>
+    <p>Every VOD member</p>
+    <p>Some might be stubs (e.g. changePointer, hidePointer, exit(?)), they're based on the Wii VOD apps (e.g. Crunchyroll)</p>
+    <script>
+        document.write("typeof vod,vod: "+typeof vod,vod+"<br>")
+        for (var idx in vod) {
+            document.write("vod."+idx+' (<a href="javascript:vod.'+idx+'()">call</a>)'+"<br>")
+        }
+    </script>
+    <br>
+    <button onclick="window.scrollTo(0,0)">scroll to top</button>
+</body>
+</html>

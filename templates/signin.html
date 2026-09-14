@@ -1,0 +1,45 @@
+<!-- not og i know, but again signing in with the password and stuff on the 3ds itself is really insecure -->
+<html lang="en">
+<head id="head">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0">
+    <title>YouTube</title>
+    <link rel="stylesheet" href="/static/css/ServiceLogin.css" type="text/css" />
+    <script type="text/javascript">
+        const ACT_URL = "{{ACT_url}}";
+        const ACT_CD  = "{{ACT_cd}}";
+        const ACT_DCD = "{{ACT_devcd}}";
+        const ACT_TTL = parseInt("{{ACT_TTL}}")
+        const ACT_TTL_RELOAD = (Number(ACT_TTL)+1)*1000;
+        var display_URL = ACT_URL.replace("https://","").replace("http://","").replace("www.","");
+    </script>
+    <script type="text/javascript" language="JavaScript" lang="en-US" src="/static/js/signin.prod.js"></script>
+    <script type="text/javascript">
+    function onload() {
+        document.addEventListener("contextmenu",function(evt){evt.preventDefault();return false;})
+        checkIsSignedIn();
+        document.getElementById("activation_cd").innerText = ACT_CD;
+        setTimeout(function() {
+            window.location.reload();
+        },ACT_TTL_RELOAD);
+    }
+    </script>
+</head>
+<body FGCOLOR="#FFF" ONLOAD="onload()" ONCONTEXTMENU="return false">
+    <center>
+        <br/>
+        <p class="header">Pair your 3DS with your account</p>
+        <img src="/static/images/servicelogin/logo_BETA.png" width="60" class="branding" draggable="false" alt="logo" />
+        <img src="/static/images/servicelogin/lbl_phone.gif" class="lbl-phone" draggable="false" alt="Leanbacklite_wii Phone" />
+    </center>
+    <div class="main_sl">
+        <span class="instructions">Go To:</span><br>
+        <span id="activation_URL"><script type="text/javascript" language="JavaScript">document.write(display_URL)</script></span><br>
+        <span class="instructions">Enter:</span><br>
+        <span id="activation_cd">Loading...</span>
+    </div>
+    <center>
+        <br><span id="exitnotice">press B to exit</span>
+    </center>
+</body>
+</html>

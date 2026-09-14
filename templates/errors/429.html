@@ -1,0 +1,25 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0">
+    <title>YouTube</title>
+    <link rel="stylesheet" href="/static/css/error.css">
+</head>
+<body>
+    <div id="mrmeh">
+        <img src="/static/images/mrmeh-1080.png" alt="mrmeh 1080" width="53" height="38" draggable="false">
+    </div>
+    <span class="text">An error has occurred.<BR>Please try again later.</span>
+    <BR><BR><br><br>{% if not debug %}<br><br>{% else %}<p>{% endif %}
+    <center>
+        <a href="http://embedded.ctr/launcher.html">
+            <button type="button"><span>Retry</span></button>
+        </a>
+        {% if debug %}
+        <a href="/debug">
+            <button type="button"><span>Debug</span></button>
+        </a>
+        {% endif %}
+    </center>
+</body>
+</html>

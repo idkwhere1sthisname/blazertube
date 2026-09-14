@@ -1,0 +1,33 @@
+/* based off the normal servicelogin CSS */
+.branding {
+    position: absolute;
+    left: 255px;
+    top:5px;
+    z-index: 1;
+}
+body {
+    color: #fff;
+    overflow: hidden;
+    background: rgba(43,43,43,255);		/* RGBA -- VODF/SWF BG Color.*/
+}
+.lbl-phone-SignedIn {
+    position: absolute;
+    left:5px;
+    top:162px;
+}
+.welcomeText {
+    font-size:18px
+}
+#userprofilepic {
+    border: 3px solid #323232;
+}
+button[type="button"] {
+    background-color: #fff;
+    border: none;
+    width:50%;
+}
+button[type="button"] span {
+    font-size: 21px;
+    align-self: center;
+    color:#000
+}

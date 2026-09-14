@@ -1,0 +1,24 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0">
+    <title>YouTube</title>
+    <link rel="stylesheet" href="/static/css/ServiceLogin_success.css" type="text/css" />
+    <SCRIPT type="text/javascript" language="JavaScript">
+        var username = "{{username}}";
+        var profileimg = "{{profileImg}}";
+    </SCRIPT>
+    <SCRIPT type="text/javascript" src="/static/js/common.js"></SCRIPT>
+</head>
+<body FGCOLOR="#FFF" onload="document.getElementById('userprofilePic').src=profileimg;document.addEventListener('contextmenu',function(evt){evt.preventDefault();return false})" oncontextmenu="return false;">
+    <CENTER>
+        <img src="/static/images/servicelogin/logo_BETA.png" width="60" class="branding" draggable="false" alt="Logo" />
+    </CENTER>
+    <CENTER>
+        <small>Signed in!</small><BR>
+        <span class="welcomeText">Welcome, <script type="text/javascript" language="JavaScript">document.write(username)</script>!</span><BR><BR>
+        <img src id="userprofilePic" width="64" height="64" alt="Profile Picture" draggable="false" /><br/><br/>
+        <button type="button" onclick="location.replace('/')"><span>Continue</span></button>
+    </CENTER>
+</body>
+</html>

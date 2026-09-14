@@ -1,0 +1,5 @@
+--atlas -f rgba -z auto
+
+textures/hulu-icon.png
+textures/netflix-icon.png
+textures/youtube-icon.png

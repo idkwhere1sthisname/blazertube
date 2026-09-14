@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0">
+    <script type="text/javascript" language="JavaScript">
+        document.cookie.split(";").forEach(function(c) {
+            const cookiename = c.split("=")[0].trim();
+            expires = new Date();
+            expires.setTime(expires.getTime() - 1);
+            document.cookie = cookiename + "=; expires=" + expires + "; path=/";
+        });
+        window.location.replace("http://embedded.ctr/launcher.html");
+    </script>
+    <title>http://embedded.ctr/launcher.html?clear_local_data=1</title>
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+</head>
+<body></body>
+</html>

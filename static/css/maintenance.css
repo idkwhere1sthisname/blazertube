@@ -1,0 +1,29 @@
+body {
+    background: rgba(43,43,43,255);		/* RGBA -- VODF/SWF BG Color.*/
+}
+
+#mrmeh {
+    position: absolute;
+    left:20px;
+    top:30px
+}
+.text {
+    color: #fff;
+    position:absolute;
+    top:25px;
+    left:90px;
+}
+.notice {
+    color:gray
+}
+button[type="button"] {
+    background-color: #fff;
+    border: none;
+    width:80%;
+    height:50% !important;
+}
+button[type="button"] span {
+    font-size: 21px;
+    align-self: center;
+    color:#000
+}

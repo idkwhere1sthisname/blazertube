@@ -1,0 +1,48 @@
+body {
+    color: #fff;
+    overflow: hidden;
+    background: rgba(43,43,43,255);		/* RGBA -- VODF/SWF BG Color.*/
+}
+.lbl-phone {
+    position: absolute;
+    z-index: -50;
+    left:0;
+    top:50px;
+}
+.header {
+    position: absolute;
+    z-index:1;
+    left: 10px;
+    top:-15px;
+}
+.branding {
+    position: absolute;
+    left: 255px;
+    top:5px;
+    z-index: 1;
+}
+.main_sl {
+    position: absolute;
+    line-break: auto;
+    left:55px;
+    top:65px;
+    z-index: 20;
+}
+.instructions {
+    color:#323232
+}
+#activation_URL {
+    color:#ffffff;
+    font-size:larger
+}
+#activation_cd {
+    color:red;
+    font-size:larger
+}
+#exitnotice {
+    z-index:5000;
+    position:absolute;
+    left:7px;
+    top:213px;
+    color:#323232
+}

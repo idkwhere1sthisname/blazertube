@@ -1,0 +1,4 @@
+
+regex:
+  - ^/robots\.txt$
+  - ^/favicon\.ico$

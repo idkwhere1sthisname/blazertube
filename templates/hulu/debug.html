@@ -1,0 +1,47 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0">
+    <title>debug reload</title>
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <script type="text/javascript">
+        function ua() {
+            document.getElementById("ua").innerText="ua: "+navigator.userAgent;
+        }
+        function getRegion(ua){const m=ua.match(/Version\/[\d.]+\.([A-Z]{2})$/);return m?m[1]:null;}
+        function j(u) {
+            location.href=j;
+        }
+        function rgn(){
+            document.getElementById("rgn").innerText="Reported region: "+getRegion(navigator.userAgent);
+        }
+    </script>
+    <style>
+        body {
+            overflow: scroll;
+        }
+        #btnscroll {
+            position:fixed;
+            top:10px;
+            left:0;
+            z-index:50000
+        }
+        #btnreload {
+            position:fixed;
+            top:10px;
+            left:50px;
+            z-index:50000
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.scrollTo(0,document.body.scrollHeight+500)" id="btnscroll">scroll</button>
+    <script>
+        document.write("typeof vod,vod: "+typeof vod,vod+"<br>")
+        for (var idx in vod) {
+            document.write("vod."+idx+' (<a href="javascript:vod.'+idx+'()">call</a>)'+"<br>")
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xs:schema PUBLIC "-//W3C//DTD XMLSCHEMA 200102//EN" "http://www.w3.org/2001/XMLSchema.dtd" [
+    <!ELEMENT p ANY>
+    <!ELEMENT br EMPTY>
+    <!ELEMENT h1 ANY>
+    <!ELEMENT a ANY>
+    <!ATTLIST a href CDATA #IMPLIED>
+    <!ELEMENT hr EMPTY>
+    <!ELEMENT img EMPTY>
+    <!ELEMENT center ANY>
+    <!ELEMENT small ANY>
+    <!ATTLIST img src ENTITY #REQUIRED>
+    <!ATTLIST img width CDATA #IMPLIED>
+    <!ATTLIST img height CDATA #IMPLIED>
+    <!ATTLIST img draggable (true | false) #IMPLIED>
+    <!ELEMENT code ANY>
+    <!NOTATION png PUBLIC "PNG 1.0" "image/png">
+    <!NOTATION jpg PUBLIC "JPG 1.0" "image/jpg">
+    <!NOTATION gif PUBLIC "GIF 1.0" "image/gif">
+    <!ENTITY logo_BETA_spec SYSTEM "/static/images/branding/logo_BETA_black.png" NDATA png>
+    <!ENTITY logo_PROD_spec SYSTEM "/static/images/branding/logo.png" NDATA png>
+    <!ENTITY logo_BETA "/static/images/branding/logo_BETA_black.png">
+    <!ENTITY logo_PROD "/static/images/branding/logo.png">
+    <!ENTITY stdwidth "180">
+]>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    attributeFormDefault="unqualified" elementFormDefault="qualified"
+    xmlns:tns="urn:bt.config" targetNamespace="urn:bt.config"
+    xmlns:xml="http://www.w3.org/XML/1998/namespace" xml:lang="en-US"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.w3.org/1999/xhtml">
+    <xs:annotation>
+        <xs:documentation>
+            <h1>BlazerTube configuration XSD</h1>
+            <p>To replace an empty value in the configuration XML, remove <code>xsi:nil</code> and add a valid value.</p>
+            <center>
+                <img src="&logo_BETA;" width="&stdwidth;" draggable="false" /><br /><br />
+                <a href="http://google.com">BlazerTube website</a>
+            </center>
+        </xs:documentation>
+    </xs:annotation>
+    <xs:simpleType name="PathType">
+        <xs:annotation />
+        <xs:restriction base="xs:string"></xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="HostType">
+        <xs:annotation />
+        <xs:restriction base="xs:normalizedString"></xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="LocalNASCPortType">
+        <xs:annotation />
+        <xs:restriction base="xs:int">
+            <xs:minInclusive value="-1" />
+            <xs:maxInclusive value="65535" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="PortType">
+        <xs:annotation />
+        <xs:restriction base="xs:positiveInteger">
+            <xs:minInclusive value="1"></xs:minInclusive>
+            <xs:maxInclusive value="65535"></xs:maxInclusive>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="BooleanType">
+        <xs:annotation />
+        <xs:restriction base="xs:boolean"></xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="VersionType">
+        <xs:annotation />
+        <xs:restriction base="xs:positiveInteger"></xs:restriction>
+    </xs:simpleType>
+    <xs:element name="configuration">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="yt_host" type="tns:HostType" nillable="false">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>yt_host</code></h1>
+                            <p>Main YouTube backend host. "localip" translates to 0.0.0.0 <small>(string)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="yt_port" type="tns:PortType" nillable="false">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>yt_port</code></h1>
+                            <p>Main YouTube backend port. Default is 80.</p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="nasc_host" type="tns:HostType" nillable="true">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>nasc_host</code></h1>
+                            <p>NASC server host (not needed unless you're not using Pretendo, Hulu Plus or Netflix). "localip" translates to 0.0.0.0. If empty, it means it needs to be set to a valid value. <small>(string)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="nasc_port" type="tns:LocalNASCPortType" nillable="true">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>nasc_port</code></h1>
+                            <p>NASC server port (not needed unless you're not using Pretendo, Hulu Plus or Netflix). Default is 9000. If empty, it means it needs to be set to a valid value. <small>(integer)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="debugging" type="tns:BooleanType" nillable="false">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>debugging</code></h1>
+                            <p>Wheter debug mode should be enabled. Debug mode disables the production server, logs every request's header, body and parameters, adds a few buttons in the HTML and enables a debug page. <small>(boolean)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="secure" type="tns:BooleanType" nillable="false">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>secure</code></h1>
+                            <p>Enables HTTPS on Hulu and YouTube. NASC and the proxy are not affected by this option and will always require HTTPS. <small>(boolean)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="pempath" type="tns:PathType" nillable="true">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>pempath</code></h1>
+                            <p>Relative path of your server's certificate. Ignore if you don't have HTTPS (secure) enabled. If empty, it means that you didn't enable HTTPS on the first server run. <small>(string)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="keypath" type="tns:PathType" nillable="true">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>keypath</code></h1>
+                            <p>Relative path of your server's private key. Ignore if you don't have HTTPS (secure) enabled. If empty, it means that you didn't enable HTTPS on the first server run. <small>(string)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="maint" type="tns:BooleanType" nillable="false">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>maint</code></h1>
+                            <p>Enables maintenance mode. Renders YouTube unusable and shows a maintenance screen. Debug pages will still be accessible if debug mode is enabled. <small>(boolean)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="hulu_host" type="tns:HostType" nillable="true">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>hulu_host</code></h1>
+                            <p>Hulu Plus server host. "localip" translates to 0.0.0.0. If it's empty, it means it needs to be set to a valid value. <small>(string)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="hulu_port" type="tns:LocalNASCPortType" nillable="true">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>hulu_port</code></h1>
+                            <p>Hulu Plus server port. Default is 80. If it's empty, it means it needs to be set to a valid value. <small>(integer)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="proxy_port" type="tns:LocalNASCPortType" nillable="true">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>proxy_port</code></h1>
+                            <p>Proxy server port. Default is 8080. Ignore unless you are going to use Hulu Plus or Netflix. If it's empty, it means it needs to be set to a valid value. <small>(integer)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="netflix_host" type="tns:HostType" nillable="true">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>netflix_host</code></h1>
+                            <p>Netflix server host. "localip" translates to 0.0.0.0. If it's empty, means it needs to be set to a valid value. <small>(integer)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="netflix_port" type="tns:LocalNASCPortType" nillable="true">
+                    <xs:annotation>
+                        <xs:documentation>
+                            <h1><code>netflix_port</code></h1>
+                            <p>Netflix server port. Default is 80. If it's empty, it means it needs to be set to a valid value. <small>(string)</small></p>
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="version" type="tns:VersionType" use="required">
+                <xs:annotation>
+                    <xs:documentation>
+                        <h1><code>version</code></h1>
+                        <p>Version of the configuration file. <small>(string, attribute)</small></p>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

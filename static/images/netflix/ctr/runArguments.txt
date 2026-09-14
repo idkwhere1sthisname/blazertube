@@ -1,0 +1,9 @@
+userName=ppdbuilder
+startTimeSec=1368825055
+netHostIpAddress=192.168.0.22
+netDefaultGateway=e5c0%10
+netPs3HostName=
+netShaderCompileHost=0.0.0.0
+netNetMask=255.255.252.0
+startTimeStr=2013-05-17 14:10:55
+netDnsServer=192.168.0.22

@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<script type="text/javascript">
+			var launcher = {
+				url:'{{host}}',
+				retryCount:0,
+				maxRetries:3
+			};
+			loadFileToElement(launcher.url);
+			function loadFileToElement(filename){
+				var that = this;
+				var xmlHTTP = new XMLHttpRequest();
+				try{
+					xmlHTTP.open("GET", filename, true);
+					xmlHTTP.send();
+				} catch (e) { that.retryCheck(); }
+				xmlHTTP.onreadystatechange=function(){
+					if (xmlHTTP.readyState==4 ){
+						try{
+							var actualTimeFromJSON = new Date(xmlHTTP.getResponseHeader('date')).getTime();
+							vod.setTime(actualTimeFromJSON);
+							if(vod.getMiiverseLink()) {
+								var params = setParams(vod.getMiiverseLink());
+								url = launcher.url + 'watch?' + params.videoURL;
+							} else {
+								url = launcher.url;
+							}
+							window.open(url, '_self');
+						}catch (e){
+							window.retryCheck();
+						}
+					}
+				}
+			}
+			function retryCheck(){
+				launcher.retryCount++;
+				loadFileToElement(launcher.url);
+			}
+			function setParams(commonString) {
+				var ret = {};
+				try {
+					ret.videoURL = commonString.split('&post_id=')[0];
+					ret.mvID = commonString.split('&post_id=')[1];
+					return ret;
+				} catch(e){}
+			}
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

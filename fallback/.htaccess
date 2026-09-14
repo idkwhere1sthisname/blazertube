@@ -1,0 +1,5 @@
+# every error except 502 shouldn't be visible
+Options -Indexes
+RewriteEngine On
+Header unset X-Powered-By
+ErrorDocument 502 /errors/502.html

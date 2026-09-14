@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<style type="text/css">
+			body {
+				padding:0;
+				margin:0;
+				background-color:white;
+			}
+			div#loading {
+				position:absolute;
+				top:114px;
+				left:135px;
+			}
+		</style>
+		<script type="text/javascript">
+			var launcher = {
+				url:'{{host}}/time',
+				retryCount :0,
+				maxRetries:3
+			};
+			loadFileToElement(launcher.url);
+			function loadFileToElement(filename){
+				var that = this;
+				var xmlHTTP = new XMLHttpRequest();
+				try{
+					xmlHTTP.open("GET",filename,true);
+					xmlHTTP.send();
+				} catch (e) { that.retryCheck(); }
+				xmlHTTP.onreadystatechange=function(){
+					if (xmlHTTP.readyState==4){
+						try{
+							var time = new Date(xmlHTTP.getResponseHeader('date')).getTime();
+							vod.setTime(time);
+							window.open("{{host}}/hulu/index.html",'_self');
+						}catch (e){
+							window.retryCheck();
+						}
+					}
+				}
+			}
+			function retryCheck(){
+				if(launcher.maxRetries===launcher.retryCount) window.open("http://embedded.ctr/error.html?error=HULU_99",'_self');
+				launcher.retryCount++;
+				loadFileToElement(launcher.url);
+			}
+			window.onunload = function() {
+				vod.hideSpinner(5000);
+			};
+		</script>
+	</head>
+	<body>
+		<div id="loading">Loading...</div>
+	</body>
+</html>

@@ -1,0 +1,22 @@
+Options -Indexes
+RewriteEngine On
+<IfModule mod_php.c>
+    php_flag expose_php Off
+</IfModule>
+ErrorDocument 404 /errors/404.html
+ErrorDocument 403 /errors/403.html
+ErrorDocument 500 /errors/500.html
+<IfModule mod_headers.c>
+    Header always unset X-Powered-By
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet"
+    Header set Content-Signal "search=no,ai-train=no,ai-input=no"
+    Header set Permissions-Policy "interest-cohort=()"
+    Header set Content-Security-Policy "frame-ancestors 'none'"
+    Header set X-Content-Type-Options "nosniff"
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET,HEAD,OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type"
+    Header set Reporting-Endpoints default="http://lbl-api.idkwh.ct8.pl/api/Report.php"
+</IfModule>
+
