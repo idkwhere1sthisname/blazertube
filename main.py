@@ -1148,8 +1148,8 @@ def videoplayback():
                     print(f"{Fore.GREEN}[playback]{Fore.RESET} Serving video from googlevideo CDN...")
                 # this loads videos significantly faster, but plays very badly on old 3DS systems
                 # only plays on New 3DS systems with overclocking enabled
-                # im gonna assume overclocking is enabled by default on new 3DS systems when using YouTube
-                response = video.fetchAndLoadStreamOnly_New3DSOnly(hl,gl,videoId,quality)
+                # im gonna assume overclocking is enabled by default on new 3DS systems when using YouTube - it is not :( (also on prod it just breaks playback)
+                response = video.fetchAndLoadStreamOnly_DLEncode(hl,gl,videoId,quality)
                 # HEADERS FIX
                 # (i have no idea how this enables playback)
                 response.headers["Cache-Control"] = "no-cache, no-store, no-transform"
