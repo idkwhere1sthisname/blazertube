@@ -19,6 +19,9 @@ dbg*.json
 /codebin/yt_save_dump/**
 /codebin/extracted_html/**
 /patcher/bin/*/*_patched.bin
+/patcher/node_modules/**
+/patcher/package-lock.json
+/patcher/package.json
 /static/images/netflix/rvl/*.bin
 /unistore/testing.unistore
 /website/**
@@ -31,6 +34,3 @@ dbg*.json
 *.crt
 *.dtd
 *.der
-
-# wip stuff
-/DOCS.md

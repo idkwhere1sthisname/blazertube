@@ -9,7 +9,7 @@
         "sheet": "blazertube-unistore.t3x",
         "bg_index": 1,
         "bg_sheet": 0,
-        "revision": 18,
+        "revision": 19,
         "version": 3
     },
     "storeContent": [
@@ -23,7 +23,7 @@
                 "icon_index": 2,
                 "sheet_index": 0,
                 "last_updated": "2026-08-07 at 14:09 (UTC)",
-                "license": "TBD",
+                "license": "MIT",
                 "releasenotes": "This update skips over the launcher and instead downloads an IPS compared to a whole binary.",
                 "version": "v2.5",
                 "screenshots": [
@@ -145,7 +145,7 @@
                 "icon_index": 0,
                 "sheet_index": 0,
                 "last_updated": "2026-07-23 at 12:23 (UTC)",
-                "license": "TBD",
+                "license": "MIT",
                 "releasenotes": "This update downloads an IPS instead of a binary.\n\nAlso shows a 002-0110 error every 2 seconds, hope you enjoy!",
                 "version": "v0.03",
                 "screenshots":[

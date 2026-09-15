@@ -12,7 +12,6 @@ $v   = "2.5";
 if ($get_version) {
     if ($fmt == "json") {
         header("Content-Type: application/json");
-        // action_get_version
         $response = [
             "prefix" => $pre,
             "strversion" => $v

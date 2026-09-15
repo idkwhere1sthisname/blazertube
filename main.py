@@ -1146,8 +1146,6 @@ def videoplayback():
                 if debugmode:
                     print(f"{Fore.YELLOW}[model]{Fore.RESET} Model: New3DS")
                     print(f"{Fore.GREEN}[playback]{Fore.RESET} Downloading and serving video...")
-                # this loads videos significantly faster, but plays very badly on old 3DS systems
-                # only plays on New 3DS systems with overclocking enabled
                 # im gonna assume overclocking is enabled by default on new 3DS systems when using YouTube - it is not :( (also on prod it just breaks playback)
                 response = video.fetchAndLoadStreamOnly_DLEncode(hl,gl,videoId,quality)
                 # HEADERS FIX

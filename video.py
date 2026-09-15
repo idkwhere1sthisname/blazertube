@@ -107,7 +107,8 @@ class GetVideo:
                 "verbose": verbose,
                 "cookiefile": self.cookies,
                 "js_runtimes": {
-                    "node": {}
+                    "deno": {},
+                    "node": {},
                 },
                 "extractor_args": {
                     "youtube": {
@@ -129,7 +130,6 @@ class GetVideo:
                     if f.get("height", 0) <= 360 and f.get("url"):
                         return f["url"]
             return None
-        # android doesn't support cookies
         cl = ["web","android","ios","android_vr","tv","mweb"]
         for client in cl:
             try:
