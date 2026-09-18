@@ -83,7 +83,7 @@ class GetVideo:
                 self.fixreadonly(name)
         print("%s[cleanup]%s Deleted %s file%s"%(Fore.MAGENTA,Fore.RESET,count,'' if abs(count) == 1 else 's'))
     @staticmethod
-    def initCookies() -> None:
+    def initCookies() -> Path:
         cookiesfile = base/"cookies.txt"
         if not cookiesfile.is_file():
             return None

@@ -68,8 +68,8 @@ FLASK_SECRET_KEY=[...]
 
 [NebulaGamez](https://github.com/nebnebgamez): Developer
 
-[Tanjirokamado12](https://github.com/Tanjirokamado12): [Inject](https://github.com/idkwhere1sthisname/blazertube/blob/main/patcher/lib/inject.py) portion of the patcher
+[Tanjirokamado12](https://github.com/Tanjirokamado12): [Inject](https://github.com/idkwhere1sthisname/blazertube/blob/master/patcher/lib/inject.py) portion of the patcher
 
-[Liinback](https://github.com/liinbacklite): [Video loader](https://github.com/idkwhere1sthisname/blazertube/blob/main/video.py), [captions](https://github.com/idkwhere1sthisname/blazertube/blob/main/captions.py), [debug](https://github.com/idkwhere1sthisname/blazertube/blob/main/debug.py) and small portions of [youtubei.py](https://github.com/idkwhere1sthisname/blazertube/blob/main/youtubei.py). The captions and video modules are based off of [Liinback 3.5](https://github.com/liinbacklite/Liinback)'s implementation, while the debug module is based on Liinback 3.0's implementation.
+[Liinback](https://github.com/liinbacklite): [Video loader](https://github.com/idkwhere1sthisname/blazertube/blob/master/video.py), [captions](https://github.com/idkwhere1sthisname/blazertube/blob/master/captions.py), [debug](https://github.com/idkwhere1sthisname/blazertube/blob/master/debug.py) and small portions of [youtubei.py](https://github.com/idkwhere1sthisname/blazertube/blob/master/youtubei.py). The captions and video modules are based off of [Liinback 3.5](https://github.com/liinbacklite/Liinback)'s implementation, while the debug module is based on Liinback 3.0's implementation.
 
-[RiiviveTube](https://github.com/ReviveMii/RiiviveTube): Portions of [youtubei.py](https://github.com/idkwhere1sthisname/blazertube/blob/main/youtubei.py)
+[RiiviveTube](https://github.com/ReviveMii/RiiviveTube): Portions of [youtubei.py](https://github.com/idkwhere1sthisname/blazertube/blob/master/youtubei.py)
