@@ -23,6 +23,7 @@ else:
 DEFAULT_DEVICE_ID       = os.getenv("DEFAULT_DEVICE_ID")
 DEFAULT_DEVICE_MODEL    = os.getenv("DEFAULT_DEVICE_MODEL")
 FLASK_SECRET_KEY        = os.getenv("FLASK_SECRET_KEY")
+INNERTUBE_KEY           = os.getenv("INNERTUBE_KEY")
 
 API_USERAGENT           = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
 TV_USERAGENT            = "Mozilla/5.0 (SMART-TV; Linux; Tizen 6.5) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/5.0 Chrome/108.0.5359.1 TV Safari/537.36"
@@ -82,7 +83,6 @@ WATCH_LATER_PLAYLIST    = "cAc%3D"
 PARAM_UNSUBSCRIBE       = "CgIIAhgA"
 PARAM_SUBSCRIBE         = "EgIIAhgA"
 PARAM_PLAYLIST_CREATE   = "CAAoAA%3D%3D"
-INNERTUBE_KEY           = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
 
 # advanced options
 SIGNINDISABLED          = False
