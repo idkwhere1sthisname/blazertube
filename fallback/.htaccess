@@ -1,5 +1,9 @@
 # every error except 502 shouldn't be visible
 Options -Indexes
 RewriteEngine On
-Header unset X-Powered-By
 ErrorDocument 502 /errors/502.html
+<IfModule mod_headers.c>
+    Header unset X-Powered-By
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
