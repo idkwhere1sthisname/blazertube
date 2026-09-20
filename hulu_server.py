@@ -1,7 +1,6 @@
 from __future__ import print_function
 from flask import Flask,Response,request,abort,render_template,redirect,send_from_directory
 from xml.etree import ElementTree as ET
-from urllib3 import disable_warnings
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_cors import cross_origin
@@ -18,7 +17,7 @@ from email.utils import format_datetime
 from main import config,secureserver,pempath,keypath,METADIR
 import debug as debugmodule
 from shared import *
-from functions import clearscreen
+from functions import clearscreen, disable_warnings
 
 allowedfile     = METADIR/"allowed.yml"
 nuisancesfile   = METADIR/"nuisances.yml"

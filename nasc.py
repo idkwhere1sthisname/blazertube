@@ -14,10 +14,9 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import time
 import sys
 import ssl
-from urllib3 import disable_warnings
 
 from shared import *
-from functions import clearscreen
+from functions import clearscreen, disable_warnings
 from main import BASE,config,METADIR
 
 nuisancesfile   = METADIR/"nuisances.yml"

@@ -41,6 +41,7 @@ GENERATED_CHANNELS      = {
     "UClgRkhTL3_hImCAmdLfDE4g": "Movies",
     "HCJYRSLjSb4y8": "Nonprofits & Activism",
     "SBAaOjE-GIlRI": "Live",
+    "UC4R8DWoMoI7CAwX8_LjQHig": "Live",
     "HCtB5yQiZTr7Y": "Animals",
     "HCLfhQGBROujg": "Autos & Vehicles",
     "HCRgNMjm7t2M0": "Comedy",
@@ -49,7 +50,8 @@ GENERATED_CHANNELS      = {
     "HCOJfFxLS-8g4": "Technology",
     "HCMCTE41mELnQ": "Travel & Events",
     "UC3yA8nDwraeOfnYfBWun83g": "Education",
-    "UC1vGae2Q3oT5MkhhfW8lwjg": "Lifestyle"
+    "UC1vGae2Q3oT5MkhhfW8lwjg": "Lifestyle",
+    "UCrpQ4p1Ql_hG8rKXIKM1MOQ": "Fashion & Beauty",
 }
 
 # html constants

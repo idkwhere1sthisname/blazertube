@@ -9,7 +9,7 @@ import threading
 import secrets
 import logging
 
-from main import app as yt_prodapp, set_external_API_url, set_version_subpath, set_versioned_xlb_subpath
+from main import app as yt_prodapp, set_external_API_url, set_version_subpath, set_versioned_xlb_subpath, COOKIESPATH
 from maint_server import app as yt_maintapp
 from hulu_server import app as huluapp
 from netflix_server import app as netflixapp
@@ -38,6 +38,8 @@ netflix_host = "!.!.!.!"
 netflix_port = -1
 
 cfgexist     = False
+cookiesexist = False
+cookiesvalid = False
 base         = Path(__name__).resolve().parent
 config       = base/"config.xml"
 
@@ -54,7 +56,7 @@ def cleanup_schedule():
         time.sleep(sleepfor)
 
 def loadcfg():
-    global host,port,debugmode,secureserver,config,cfgexist,maint,hulu_host,hulu_port,netflix_host,netflix_port
+    global host,port,debugmode,secureserver,config,cfgexist,maint,hulu_host,hulu_port,netflix_host,netflix_port,cookiesexist,cookiesvalid
     if not config.is_file():
         cfgexist = False
         return
@@ -79,6 +81,13 @@ def loadcfg():
     debugmode = bool(safeget("debugging","false").lower().strip() == "true")
     secureserver = bool(safeget("secure","false").lower().strip() == "true")
     maint = safeget("maint","false").lower().strip() == "true"
+    cookiesexist = COOKIESPATH.is_file()
+    if cookiesexist:
+        cookies_content = COOKIESPATH.read_text("utf-8")
+        if not cookies_content.startswith("# Netscape HTTP Cookie File"): # standard header for cookies
+            cookiesvalid = False
+        else:
+            cookiesvalid = True
     hulu_host = safeget("hulu_host","!.!.!.!")
     if hulu_host is None:
         hulu_host = "!.!.!.!"
@@ -109,7 +118,7 @@ if __name__ == "__main__":
         colorama.init(autoreset=True)
         Fore = colorama.Fore
         clearscreen()
-        if not config.is_file():
+        if not cfgexist:
             print("Please run main.py to create a configuration file first.")
             sys.exit(-1)
         if debugmode:
@@ -149,6 +158,15 @@ if __name__ == "__main__":
                 serveapp = yt_maintapp
             else:
                 serveapp = yt_prodapp
+                if not cookiesexist:
+                    print(f"{Fore.RED}[err]{Fore.RESET} Cannot continue without cookies, they are required for production.")
+                    print(f"{Fore.BLUE}[info]{Fore.RESET} For more info on how to export cookies, refer to this guide: https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp")
+                    print(f"{Fore.BLUE}[info]{Fore.RESET} Once done, place the exported cookies in this directory with the filename \"cookies.txt\"")
+                    sys.exit(-1)
+                elif not cookiesvalid:
+                    print(f"{Fore.RED}[err]{Fore.RESET} The cookies provided are invalid.")
+                    print(f"{Fore.BLUE}[info]{Fore.RESET} For more info on how to re-export cookies, refer to this guide: https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp")
+                    sys.exit(-1)
             serveapp.secret_key = FLASK_SECRET_KEY
             if not serveapp.secret_key:
                 thistmpkey = secrets.token_hex(32)

@@ -5,7 +5,6 @@ from flask_limiter import Limiter
 from flask_ipban import IpBan
 from flask_limiter.util import get_remote_address
 from pathlib import Path
-from urllib3 import disable_warnings
 from xml.sax.saxutils import escape as esc
 from xml.etree import ElementTree as ET
 import sys

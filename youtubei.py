@@ -19,6 +19,7 @@ import functions as funcmod
 
 CHANNEL_ID_RE = re.compile(r"UC[A-Za-z0-9_-]{22}")
 TOPIC_ID_RE   = re.compile(r"HC[A-Za-z0-9_-]{11}")
+LIVE_ID_TOPIC = "SBAaOjE-GIlRI"
 TOPIC_TYPES   = t.Literal["edu","education","music","live","sports","autos","gaming","news","tv"]
 
 def simpletext(obj):
@@ -2227,9 +2228,13 @@ class InnerTubeAPI:
     def _ST_topics_Live(self,hl="en",gl="US",continuation_token=None):
         return self._videosearch("live",hl=hl,gl=gl,continuation_token=continuation_token)
     def _ST_topics_TV(self,hl="en",gl="US",continuation_token=None):
-        return self._videosearch("TV shows",hl=hl,gl=gl,continuation_token=continuation_token)
-    def _ST_topics_Edu(self,hl="en",gl="US",continuation_token=None):
+        return self._videosearch("TV",hl=hl,gl=gl,continuation_token=continuation_token)
+    def _ST_topics_Movies(self,hl="en",gl="US",continuation_token=None):
+        return self._videosearch("movies",hl=hl,gl=gl,continuation_token=continuation_token)
+    def _ST_topics_Education(self,hl="en",gl="US",continuation_token=None):
         return self._videosearch("education",hl=hl,gl=gl,continuation_token=continuation_token)
+    def _ST_topics_Fashion(self,hl="en",gl="US",continuation_token=None):
+        return self._videosearch("fashion",hl=hl,gl=gl,continuation_token=continuation_token)
     def _get_topic(self,kw,hl="en",gl="US",continuation_token=None):
         if kw == "sports":
             return self._ST_topics_Sports(hl=hl,gl=gl,continuation_token=continuation_token)
@@ -2243,10 +2248,14 @@ class InnerTubeAPI:
             return self._ST_topics_Autos(hl=hl,gl=gl,continuation_token=continuation_token)
         elif kw == "live":
             return self._ST_topics_Live(hl=hl,gl=gl,continuation_token=continuation_token)
-        elif kw in ["tv","movies","show","shows"]:
+        elif kw in ["movies"]:
+            return self._ST_topics_Movies(hl=hl,gl=gl,continuation_token=continuation_token)
+        elif kw in ["tv","show","shows"]:
             return self._ST_topics_TV(hl=hl,gl=gl,continuation_token=continuation_token)
         elif kw in ["education","edu"]:
-            return self._ST_topics_Edu(hl=hl,gl=gl,continuation_token=continuation_token)
+            return self._ST_topics_Education(hl=hl,gl=gl,continuation_token=continuation_token)
+        elif kw == "fashion":
+            return self._ST_topics_Fashion(hl=hl,gl=gl,continuation_token=continuation_token)
         return {}
     def _channelsearch(self,query,limit=10,continuation_token=None):
         if continuation_token:

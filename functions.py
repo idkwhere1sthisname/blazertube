@@ -4,6 +4,7 @@ import json
 from urllib.parse import quote
 import socket
 from pathlib import Path
+import warnings
 
 from shared import *
 
@@ -185,3 +186,6 @@ def make_HTMLOnly_AJAX_response(htmlInner,timestamp,signed_in_username=None,sign
     if signed_in_email:
         json_r["signed_in_email"] = signed_in_email
     return json_r
+
+def disable_warnings(warn):
+    warnings.simplefilter("ignore",warn)

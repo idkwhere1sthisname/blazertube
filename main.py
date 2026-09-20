@@ -11,7 +11,7 @@ import requests
 from werkzeug.serving import WSGIRequestHandler
 from werkzeug.middleware.proxy_fix import ProxyFix
 from xml.etree import ElementTree as ET
-from urllib3 import disable_warnings
+import warnings
 from urllib.parse import urlencode, unquote, quote
 import ssl
 from functools import wraps
@@ -39,6 +39,7 @@ TEMPLATES_DIR  = BASE/"templates"
 DEFAULT_FMT    = "©2013 YouTube LLC"
 root           = ""
 METADIR        = BASE/"meta"
+COOKIESPATH    = BASE/"cookies.txt"
 
 EXT_API_PROT   = "http"
 EXT_API_HOST   = "127.0.0.1"
@@ -140,6 +141,8 @@ secureserver = False
 maint        = False
 
 cfgexist          = False
+cookiesvalid      = False
+cookiesexist      = False
 
 def set_external_API_url(extapiprot,extapihost,extapiport="443"):
     global EXT_API_PROT,EXT_API_HOST,EXT_API_PORT
@@ -157,7 +160,7 @@ def set_versioned_xlb_subpath(subpath):
     XLB_URL = "%s://%s:%s/%s"%(EXT_API_PROT,EXT_API_HOST,EXT_API_PORT,subpath)
 
 def loadcfg():
-    global host,port,debugmode,secureserver,keypath,pempath,config,cfgexist,maint,huluhost,huluport
+    global host,port,debugmode,secureserver,keypath,pempath,config,cfgexist,maint,huluhost,huluport,cookiesvalid,cookiesexist
     if not config.is_file():
         cfgexist = False
         return
@@ -177,6 +180,13 @@ def loadcfg():
         port = 80
     debugmode = bool(safeget("debugging","false").lower().strip() == "true")
     secureserver = bool(safeget("secure","false").lower().strip() == "true")
+    cookiesexist = COOKIESPATH.is_file()
+    if cookiesexist:
+        cookies_content = COOKIESPATH.read_text("utf-8")
+        if not cookies_content.startswith("# Netscape HTTP Cookie File"): # standard header for cookies
+            cookiesvalid = False
+        else:
+            cookiesvalid = True
     if secureserver:
         pempath = Path(safeget("pempath","ssl/rootCA.crt"))
         keypath = Path(safeget("keypath","ssl/rootCA.key"))
@@ -783,8 +793,11 @@ def guide_ajax():
                     make_guide_item("Music", "/topic/UC-9-kyTW8ZkZNDHQJ6FgpwQ", "/static/images/topics/icons/thumb_music.jpg"),
                     make_guide_item("Sports", "/topic/UCEgdi0XIXXZ-qJOFPf4JSKw", "/static/images/topics/icons/thumb_sports.jpg"),
                     make_guide_item("Gaming", "/topic/UCOpNcN46UbXVtpKMrmU4Abg", "/static/images/topics/icons/thumb_gaming.jpg"),
-                    make_guide_item("News", "/topic/UCYfdidRxbB8Qhf0Nx7ioOYw", "/static/images/topics/icons/thumb_news.jpg"),
+                    make_guide_item("Education","/topic/UC3yA8nDwraeOfnYfBWun83g","/static/images/topics/icons/thumb_education.jpg"),
                     make_guide_item("Movies", "/topic/UClgRkhTL3_hImCAmdLfDE4g", "/static/images/topics/icons/thumb_movies_new.jpg"),
+                    make_guide_item("TV Shows","/topic/UClgRkhTL3_hImCAmdLfDE4g","/static/images/topics/icons/thumb_tv_shows.jpg"),
+                    make_guide_item("News", "/topic/UCYfdidRxbB8Qhf0Nx7ioOYw", "/static/images/topics/icons/thumb_news.jpg"),
+                    make_guide_item("Live","/topic/UC4R8DWoMoI7CAwX8_LjQHig","/static/images/topics/icons/thumb_live.png"),
                     make_guide_item("Spotlight","/user/UCBR8-60-B28hp2BmDPdntcQ","/static/images/topics/icons/thumb_spotlight.png"), # what channel would this even be?
                 ]},
                 {"title": "CHANNELS FOR YOU", "items": []},
@@ -1183,7 +1196,7 @@ def pfpproxy(userId):
         "UC4R8DWoMoI7CAwX8_LjQHig":"thumb_live.png",
         "UCBR8-60-B28hp2BmDPdntcQ":"thumb_spotlight.png",
         "HCJYRSLjSb4y8": "thumb_topic.jpg",
-        "UC3yA8nDwraeOfnYfBWun83g": "thumb_education.png",
+        "UC3yA8nDwraeOfnYfBWun83g": "thumb_education.jpg",
         "SBAaOjE-GIlRI": "thumb_live.png",
         "HCtB5yQiZTr7Y": "thumb_topic.jpg",
         "HCLfhQGBROujg": "thumb_topic.jpg",
@@ -1423,6 +1436,7 @@ def userchannel(channeltype="channel",user_id=None,subpath=None):
         "UCOpNcN46UbXVtpKMrmU4Abg": "gaming",
         "UCYfdidRxbB8Qhf0Nx7ioOYw": "news",
         "UClgRkhTL3_hImCAmdLfDE4g": "movies",
+        "UC4R8DWoMoI7CAwX8_LjQHig": "live",
         "SBAaOjE-GIlRI": "live",
         "HCJYRSLjSb4y8": "activism",
         "HCtB5yQiZTr7Y": "pets",
@@ -1500,8 +1514,35 @@ def userchannel(channeltype="channel",user_id=None,subpath=None):
         auto_generated = True
     elif user_id in GENERATED_CHANNELS:
         auto_generated = True
-    json_r = {
-        "content": {
+    profile = {}
+    requires_ext_json = ["UC3yA8nDwraeOfnYfBWun83g"]
+    if user_id in requires_ext_json:
+        jsonres_path = METADIR/"topic_res.json"
+        if jsonres_path.is_file():
+            jsonres = json.load(open(jsonres_path,"r"))
+        else:
+            pass
+        info = jsonres.get(user_id,{})
+        if info:
+            name = info.get("name","")
+            public_name = name.lower()
+            about = info.get("bio","")
+            actualid = info.get("channel_id",user_id)
+            ICON = f"/topic/{actualid}/icon"
+            profile_templ = render_template(
+                "components/json/channel_template.json",
+                CHANNEL_ID=actualid,
+                SUBSCRIBE_XSRF_TOKEN=subscribe_xsrf_token,
+                NAME=name,
+                ABOUT=about,
+                ICON=ICON,
+                PUBLIC_NAME=public_name,
+            )
+            profile = json.loads(profile_templ)
+        else:
+            pass
+    else:
+        profile = {
             "owner_profile": {
                 "about_me": chinf.get("description", ""),
                 "description": chinf.get("description", ""),
@@ -1535,10 +1576,9 @@ def userchannel(channeltype="channel",user_id=None,subpath=None):
                     "url": f"/subscribe?action_subscribe=1",
                     "channel_id": user_id
                 },
-                # does this one even get read???
                 "unsubscribe_url": {
-                   "url": f"/subscribe?action_subscribe=0",
-                   "channel_id": user_id
+                    "url": f"/subscribe?action_subscribe=0",
+                    "channel_id": user_id
                 },
                 "show_button": show_subscribe_button,
             },
@@ -1550,6 +1590,10 @@ def userchannel(channeltype="channel",user_id=None,subpath=None):
                 "banner_image": banner,
                 "banner_image_hd": banner,
             },
+        }
+    json_r = {
+        "content": {
+            **profile,
             "tab_settings": {
                 "available_tabs": [
                     {
@@ -3275,14 +3319,13 @@ if __name__ == "__main__":
         ET.indent(tree,space="    ")
         print("Saving your configuration...")
         tree.write(config,encoding="utf-8",xml_declaration=True)
-        print("Done! To create a patch, please go to /patcher/ and run patcher.py")
-        print("Remember to install the patcher dependencies")
+        print("Done! To create a patch for the 3DS app, run patcher.py in /patcher/")
         print("For more information, please read the README.")
         time.sleep(5.00)
         funcmod.clearscreen()
     context = None
     if secureserver:
-        disable_warnings(DeprecationWarning)
+        funcmod.disable_warnings(DeprecationWarning)
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.set_ciphers("ALL:@SECLEVEL=0")
         context.minimum_version = ssl.TLSVersion.TLSv1
@@ -3294,7 +3337,7 @@ if __name__ == "__main__":
         print("Please rename .env.example to .env, and then re-run the server to continue.")
         sys.exit(-1)
     if (not GDATA_API_KEY) or (not GDATA_API_KEY.strip()):
-        print("Cannot continue without a GDATA API key. Please place one in .env")
+        print("Cannot continue without a YouTube Data API key. Please place one in .env")
         sys.exit(-1)
     if (not LOGIN_SCOPE) or (not OAUTH_ID) or (not OAUTH_SECRET):
         print("One or more required environment variables are missing.")
@@ -3332,4 +3375,10 @@ if __name__ == "__main__":
         set_external_API_url("https","lbl-api.idkwh.ct8.pl","443")
         set_versioned_xlb_subpath("api/ctr/GetVersionedXLB.php")
         set_version_subpath("api/ctr/GetVersion.php")
+    if not cookiesexist:
+        print(f"{Fore.YELLOW}[warn]{Fore.RESET} Cookie file not found")
+        print(f"{Fore.BLUE}[info]{Fore.RESET} For more info on how to export cookies, refer to this guide: https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp")
+    elif not cookiesvalid:
+        print(f"{Fore.YELLOW}[warn]{Fore.RESET} Cookie file is invalid")
+        print(f"{Fore.BLUE}[info]{Fore.RESET} For more info on how to re-export cookies, refer to this guide: https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp")
     app.run(host=host,port=port,debug=debugmode,threaded=True,ssl_context=context,extra_files=["config.xml",".env"])

@@ -1,4 +1,4 @@
-<!-- markdownlint-disable MD033 MD059 -->
+<!-- markdownlint-disable MD033 MD059 MD007 -->
 # <div align="center">BlazerTube</div><p>
 
 <div align="center">
@@ -37,30 +37,54 @@ This allows you to install updates to BlazerTube without having to manually repl
 
 Requirements:
 
-- Python 3.12 or newer
-- pip
+- Python 3.12 or newer and pip
 - Node.js 26 or newer (to install Deno)
 - ffmpeg
 
-1. Install [node.js](https://nodejs.org/), [Python](https://www.python.org/downloads/) 3.12 or newer and [ffmpeg](https://ffmpeg.org/) if you haven't already.
+1. Install [Node.js](https://nodejs.org/), [Python](https://www.python.org/downloads/) 3.12 or newer and [ffmpeg](https://ffmpeg.org/) if you haven't already.
 2. Install [Deno](https://docs.deno.com/runtime/getting_started/installation/) and [pip](https://pip.pypa.io/en/stable/installation/) too, if you haven't already.
-3. Install the Python dependencies using `pip install -r requirements.txt`
-4. Rename `.env.example` to `.env` and add a YouTube GDATA v3 API key
-    - **Despite most of the server being InnerTube-based, some functions are GDATA API based. (e.g. browsing recommended channels)**
-5. Optionally run `/patcher/patcher.py` to create a patched binary.
-6. To avoid YouTube blocking your IP, you should also export your own [cookies](https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp).
-7. Run the Python server to create a configuration file
-8. Once done, add a secret Flask key (that you shouldn't share!) to `.env` (the server automatically gives you one if it doesn't detect it), it must be added to `.env` with this syntax:
+3. Clone the repo or download it:
+    - `git clone https://github.com/idkwhere1sthisname/blazertube`
+4. Install the Python dependencies by running `pip install -r requirements.txt`
+5. Rename `.env.example` to `.env` and add a YouTube Data API v3 key
+    - **Despite most of the server being InnerTube-based, some functions are Data API based. (e.g. browsing recommended channels)**
+6. Optionally run `/patcher/patcher.py` to create a patched binary.
+7. To avoid YouTube blocking your IP, you should also export your own [cookies](https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp).
+8. Run the Python server to create a configuration file
+9. Once done, add a secret Flask key (that you shouldn't share!) to `.env` (the server automatically gives you one if it doesn't detect it), it must be added to `.env` with this syntax:
 
 ```env
 FLASK_SECRET_KEY=[...]
 ```
 
+## Working features
+
+- Playing short videos (unless using a New 3DS)
+    - Videos can be toggled between 144p and 240p on Old 3DS consoles, otherwise they're locked to 360p on New 3DS consoles
+- Sign in (doesn't work with multiple accounts)
+    - Includes (dis)liking videos, (un)subscribing from channels, adding/removing from playlists, Watch Later, Liked Videos, video recommendations, viewing uploaded videos, etc...
+- Pairing with TV/Console
+    - This renders the 3DS app more prone to crashes as it was never meant to do that probably
+- Pagination
+- Searching playlists, channels and videos
+- Topic channels (e.g. News, Music, etc)
+- Browsing recommended channels
+- Region/language switching
+- Safety mode (called safe mode in the app itself)
+
 ## Known bugs
 
-- Random crashes (the app sucks unfortunately)
+- Random crashes (the 3DS app sucks unfortunately)
 - Longer videos take a long time to play
 - Captions do not work
+- Opening settings twice reloads the page
+
+## Todo
+
+- Channel switcher
+- Viewing personal playlists
+- Actual channel topics (instead of it being a shortcut to search)(?)
+- Adding inbox and social if possible
 
 ## Credits
 

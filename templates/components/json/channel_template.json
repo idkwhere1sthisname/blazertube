@@ -1,47 +1,45 @@
 {
-    "content": {
-        "owner_profile": {
-            "about_me": null,
-            "description": null,
-            "auto_generated": true,
-            "country": null,
-            "custom_url_items": [],
-            "linked_sites": [],
-            "hometown": null,
-            "age": null,
-            "image_url": "{{ICON}}",
-            "joined_date": null,
-            "profile_url": "/topic/{{CHANNEL_ID}}",
-            "public_name": "{{NAME}}",
-            "channel_subscriber_count": null,
-            "subscriber_count": null,
-            "title": "{{NAME}}",
-            "upload_count": null,
-            "video_view_count": null,
-            "url": "/topic/{{CHANNEL_ID}}"
+    "owner_profile": {
+        "about_me": "{{ABOUT}}",
+        "description": "{{ABOUT}}",
+        "auto_generated": true,
+        "country": null,
+        "custom_url_items": [],
+        "linked_sites": [],
+        "hometown": null,
+        "age": null,
+        "image_url": "{{ICON}}",
+        "joined_date": null,
+        "profile_url": "/topic/{{CHANNEL_ID}}",
+        "public_name": "{{PUBLIC_NAME}}",
+        "channel_subscriber_count": null,
+        "subscriber_count": null,
+        "title": "{{NAME}}",
+        "upload_count": null,
+        "video_view_count": null,
+        "url": "/topic/{{CHANNEL_ID}}"
+    },
+    "subscribe_xsrf_token": "{{SUBSCRIBE_XSRF_TOKEN}}",
+    "subscription_button_data": {
+        "has_available_offer": false,
+        "offer_unavailable": false,
+        "render_as_paid": false,
+        "channel_external_id": "{{CHANNEL_ID}}"
+    },
+    "subscription_state": {
+        "is_subscribed": false,
+        "subscribe_url": {
+            "url": null,
+            "channel_id": "{{CHANNEL_ID}}"
         },
-        "subscribe_xsrf_token": "{{XSRF_TOKEN}}",
-        "subscription_button_data": {
-            "has_available_offer": false,
-            "offer_unavailable": false,
-            "render_as_paid": false,
-            "channel_external_id": "{{CHANNEL_ID}}"
-        },
-        "subscription_state": {
-            "is_subscribed": false,
-            "subscribe_url": {
-                "url": null,
-                "channel_id": "{{CHANNEL_ID}}"
-            },
-            "show_button": false
-        },
-        "category_link": "Hi",
-        "category_rec_count": 2,
-        "category_title": "Null",
-        "items": [],
-        "banner_images": {
-            "banner_image": "{{banner}}",
-            "banner_image_hd": "{{banner}}"
-        }
+        "show_button": false
+    },
+    "category_link": "Hi",
+    "category_rec_count": 2,
+    "category_title": "Null",
+    "items": [],
+    "banner_images": {
+        "banner_image": "{{banner}}",
+        "banner_image_hd": "{{banner}}"
     }
 }

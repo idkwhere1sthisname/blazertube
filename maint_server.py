@@ -11,10 +11,10 @@ from flask_limiter.util import get_remote_address
 import sys
 import ssl
 from xml.etree import ElementTree as ET
-from urllib3 import disable_warnings
 
 from shared import *
 import debug
+from functions import disable_warnings
 
 BASE = Path(__file__).resolve().parent
 METADIR = BASE/"meta"
