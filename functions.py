@@ -1,14 +1,18 @@
+from __future__ import print_function, annotations
 import requests
 import re
 import json
 from urllib.parse import quote
 import socket
+import requests
 from pathlib import Path
 import warnings
+from typing import Literal
 
 from shared import *
 
 BASE = Path(__file__).resolve().parent
+CLIENTS = Literal["WEB","TV"]
 
 def getThumbnail(videoId):
     url = f"http://i.ytimg.com/vi/{videoId}/mqdefault.jpg"
@@ -187,5 +191,30 @@ def make_HTMLOnly_AJAX_response(htmlInner,timestamp,signed_in_username=None,sign
         json_r["signed_in_email"] = signed_in_email
     return json_r
 
-def disable_warnings(warn):
-    warnings.simplefilter("ignore",warn)
+def disable_warnings(warn: type[Warning]):
+    warnings.simplefilter("ignore",category=warn)
+
+def get_innertube_key(fallback,client:CLIENTS="TV"):
+    try:
+        if client == "TV":
+            url = "https://www.youtube.com/tv"
+            ua = TV_USERAGENT
+        elif client == "WEB":
+            url = "https://www.youtube.com/"
+            ua = API_USERAGENT
+        else:
+            url = "https://www.youtube.com/tv"
+            ua = TV_USERAGENT
+        r = requests.get(url,timeout=50,cookies=CONSENT_COOKIES,headers={
+            "User-Agent": ua,
+        })
+        httpcd = r.status_code
+        r.raise_for_status()
+        data = r.text
+    except requests.RequestException:
+        return fallback,True,httpcd
+    m = re.search(r'"INNERTUBE_API_KEY":"([^"]+)"',data)
+    upd_api_key = m.group(1) if m else None
+    if not upd_api_key:
+        return fallback,True,httpcd
+    return upd_api_key,False,httpcd

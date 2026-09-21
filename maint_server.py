@@ -1,5 +1,5 @@
-from __future__ import print_function
-from flask import Flask,redirect,render_template,request,Response,send_from_directory,abort
+from __future__ import print_function, annotations
+from flask import Flask, redirect, render_template, request, Response, send_from_directory, abort
 from flask_cors import cross_origin
 from flask_compress import Compress
 from flask_ipban import IpBan
@@ -82,6 +82,7 @@ def maint():
     return Response(render_template("maintenance.html"),status=200,headers={"Content-Type":"text/html; charset=utf-8"})
 
 @app.route("/status",methods=["GET","HEAD"])
+@cross_origin(methods=["GET","HEAD","OPTIONS"],origins=["*"])
 def status():
     return Response(status=503)
 
@@ -91,17 +92,12 @@ def status():
 def favicon():
     return send_from_directory("static","favicon.ico")
 
+@app.route("/static/configuration.xsd")
 @app.route("/static/favicon_hulu.ico")
 @app.route("/static/favicon_netflix.ico")
-def routes404():
+@app.route("/static/images/netflix/<string:netflixpath>",strict_slashes=False)
+def routes404(netflixpath=None):
     return abort(404)
-
-@app.route("/static/configuration.xsd")
-def configxsd():
-    if debugmode:
-        return send_from_directory("static","configuration.xsd"),200,{"Content-Type":"application/xhtml+xml; charset=utf-8"}
-    else:
-        return abort(404)
 
 @app.route("/robots.txt")
 def robotstxt():
@@ -141,9 +137,30 @@ def before_request_redirect():
     if request.path != "/" and not request.path.startswith("/static/") and not request.path == "/favicon.ico" and not request.path == "/robots.txt" and not request.path == "/status":
         return redirect("/",code=302)
 
+@app.after_request
+def after_request(response:Response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    if response.status_code == 204:
+        response.headers.pop("Content-Type",None)
+    return response
+
+@app.route(403)
+def forbidden(err):
+    return Response(render_template("errors/403.html"))
+
 @app.errorhandler(429)
 def toomanyrequests(err):
-    return Response(render_template("errors/429.html"),status=200,headers={"Content-Type":"text/html; charset=utf-8"})
+    return Response(render_template("errors/429.html"))
+
+@app.errorhandler(500)
+def servererror(err):
+    return Response(render_template("errors/500.html"))
+
+@app.errorhandler(502)
+@app.errorhandler(503)
+def unavailable(err):
+    return Response(render_template("errors/502.html"))
 
 if __name__ == "__main__":
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
@@ -159,8 +176,12 @@ if __name__ == "__main__":
         disable_warnings(DeprecationWarning)
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.set_ciphers("ALL:@SECLEVEL=0")
-        context.minimum_version = ssl.PROTOCOL_TLSv1
-        context.maximum_version = ssl.PROTOCOL_TLSv1
+        try:
+            context.minimum_version = ssl.TLSVersion.TLSv1
+            context.maximum_version = ssl.TLSVersion.TLSv1
+        except:
+            context.minimum_version = ssl.TLSVersion.TLSv1_2
+            context.maximum_version = ssl.TLSVersion.TLSv1_2
         if not pempath.is_file():
             print("PEM certificate not found.")
             sys.exit(-1)

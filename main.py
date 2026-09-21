@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, annotations
 from flask import Flask, Response, send_file, request, abort, render_template, redirect, send_from_directory, g, make_response, session
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -3063,7 +3063,6 @@ def nocontentroutes():
 @app.route("/static/images/netflix/<string:subpath>",strict_slashes=False)
 @app.route("/static/favicon_hulu.ico")
 @app.route("/static/favicon_netflix.ico")
-@app.route("/static/images/netflix/<string:subpath>",strict_slashes=False)
 def routes404(subpath=None):
     return abort(404)
 
@@ -3329,8 +3328,12 @@ if __name__ == "__main__":
         funcmod.disable_warnings(DeprecationWarning)
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.set_ciphers("ALL:@SECLEVEL=0")
-        context.minimum_version = ssl.TLSVersion.TLSv1
-        context.maximum_version = ssl.TLSVersion.TLSv1
+        try:
+            context.minimum_version = ssl.TLSVersion.TLSv1
+            context.maximum_version = ssl.TLSVersion.TLSv1
+        except Exception:
+            context.minimum_version = ssl.TLSVersion.TLSv1_2
+            context.maximum_version = ssl.TLSVersion.TLSv1_2
         context.load_cert_chain(certfile=pempath,keyfile=keypath)
     envexample = BASE/".env.example"
     envfile = BASE/".env"
@@ -3382,4 +3385,31 @@ if __name__ == "__main__":
     elif not cookiesvalid:
         print(f"{Fore.YELLOW}[warn]{Fore.RESET} Cookie file is invalid")
         print(f"{Fore.BLUE}[info]{Fore.RESET} For more info on how to re-export cookies, refer to this guide: https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp")
+    if not ENABLE_CREDS_OVERRIDE:
+        if debugmode:
+            print(f"{Fore.BLUE}[info]{Fore.RESET} Checking if the InnerTube API key is up to date...")
+        upd_api_key,isfallback,httpcd = funcmod.get_innertube_key(INNERTUBE_KEY,"TV")
+        if debugmode:
+            if isfallback:
+                if httpcd == 200:
+                    print(f"{Fore.RED}[error]{Fore.RESET} Using fallback key, YouTube did not return a valid key")
+                else:
+                    print(f"{Fore.RED}[error]{Fore.RESET} Using fallback key, couldn't contact YouTube (HTTP {httpcd})")
+            elif upd_api_key == INNERTUBE_KEY:
+                print(f"{Fore.BLUE}[info]{Fore.RESET} InnerTube API key is up to date (HTTP {httpcd})")
+        if not isfallback and upd_api_key != INNERTUBE_KEY:
+            if debugmode:
+                print(f"{Fore.BLUE}[info]{Fore.RESET} Updating InnerTube key (old: {INNERTUBE_KEY}, new: {upd_api_key})")
+            with open(".env","r",encoding="utf-8") as f:
+                lines = f.readlines()
+            with open(".env","w",encoding="utf-8") as f:
+                for l in lines:
+                    if l.startswith("INNERTUBE_KEY="):
+                        f.write(f"INNERTUBE_KEY={upd_api_key}\n")
+                    else:
+                        f.write(l)
+            os.environ["INNERTUBE_KEY"] = upd_api_key
+            if debugmode:
+                print(f"{Fore.GREEN}[info]{Fore.RESET} InnerTube key updated, reloading...")
+            os.execv(sys.executable, [sys.executable] + sys.argv)
     app.run(host=host,port=port,debug=debugmode,threaded=True,ssl_context=context,extra_files=["config.xml",".env"])
