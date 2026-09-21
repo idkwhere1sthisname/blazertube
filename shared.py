@@ -52,6 +52,7 @@ GENERATED_CHANNELS      = {
     "UC3yA8nDwraeOfnYfBWun83g": "Education",
     "UC1vGae2Q3oT5MkhhfW8lwjg": "Lifestyle",
     "UCrpQ4p1Ql_hG8rKXIKM1MOQ": "Fashion & Beauty",
+    "UCl8dMTqDrJQ0c8y23UBu4kQ": "TV Shows",
 }
 
 # html constants

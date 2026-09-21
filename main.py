@@ -795,10 +795,10 @@ def guide_ajax():
                     make_guide_item("Gaming", "/topic/UCOpNcN46UbXVtpKMrmU4Abg", "/static/images/topics/icons/thumb_gaming.jpg"),
                     make_guide_item("Education","/topic/UC3yA8nDwraeOfnYfBWun83g","/static/images/topics/icons/thumb_education.jpg"),
                     make_guide_item("Movies", "/topic/UClgRkhTL3_hImCAmdLfDE4g", "/static/images/topics/icons/thumb_movies_new.jpg"),
-                    make_guide_item("TV Shows","/topic/UClgRkhTL3_hImCAmdLfDE4g","/static/images/topics/icons/thumb_tv_shows.jpg"),
+                    make_guide_item("TV Shows","/topic/UCl8dMTqDrJQ0c8y23UBu4kQ","/static/images/topics/icons/thumb_tv_shows.jpg"),
                     make_guide_item("News", "/topic/UCYfdidRxbB8Qhf0Nx7ioOYw", "/static/images/topics/icons/thumb_news.jpg"),
                     make_guide_item("Live","/topic/UC4R8DWoMoI7CAwX8_LjQHig","/static/images/topics/icons/thumb_live.png"),
-                    make_guide_item("Spotlight","/user/UCBR8-60-B28hp2BmDPdntcQ","/static/images/topics/icons/thumb_spotlight.png"), # what channel would this even be?
+                    make_guide_item("Spotlight","/user/UCBR8-60-B28hp2BmDPdntcQ","/static/images/topics/icons/thumb_spotlight.png"),
                 ]},
                 {"title": "CHANNELS FOR YOU", "items": []},
                 {"title": "","items": []},
@@ -1197,6 +1197,7 @@ def pfpproxy(userId):
         "UCBR8-60-B28hp2BmDPdntcQ":"thumb_spotlight.png",
         "HCJYRSLjSb4y8": "thumb_topic.jpg",
         "UC3yA8nDwraeOfnYfBWun83g": "thumb_education.jpg",
+        "UCl8dMTqDrJQ0c8y23UBu4kQ": "thumb_tv_shows.jpg",
         "SBAaOjE-GIlRI": "thumb_live.png",
         "HCtB5yQiZTr7Y": "thumb_topic.jpg",
         "HCLfhQGBROujg": "thumb_topic.jpg",
@@ -1446,7 +1447,8 @@ def userchannel(channeltype="channel",user_id=None,subpath=None):
         "HCVezXaU34vJk": "people",
         "HCOJfFxLS-8g4": "technology",
         "HCMCTE41mELnQ": "travel",
-        "UC3yA8nDwraeOfnYfBWun83g": "education"
+        "UC3yA8nDwraeOfnYfBWun83g": "education",
+        "UCl8dMTqDrJQ0c8y23UBu4kQ": "shows",
     }
     if "K" in totalviews:
         displayviews = int(float(totalviews.replace("K","").replace(",",""))*1000)

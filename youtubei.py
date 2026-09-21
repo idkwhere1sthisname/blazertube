@@ -2228,7 +2228,7 @@ class InnerTubeAPI:
     def _ST_topics_Live(self,hl="en",gl="US",continuation_token=None):
         return self._videosearch("live",hl=hl,gl=gl,continuation_token=continuation_token)
     def _ST_topics_TV(self,hl="en",gl="US",continuation_token=None):
-        return self._videosearch("TV",hl=hl,gl=gl,continuation_token=continuation_token)
+        return self._videosearch("TV shows",hl=hl,gl=gl,continuation_token=continuation_token)
     def _ST_topics_Movies(self,hl="en",gl="US",continuation_token=None):
         return self._videosearch("movies",hl=hl,gl=gl,continuation_token=continuation_token)
     def _ST_topics_Education(self,hl="en",gl="US",continuation_token=None):
@@ -2250,7 +2250,7 @@ class InnerTubeAPI:
             return self._ST_topics_Live(hl=hl,gl=gl,continuation_token=continuation_token)
         elif kw in ["movies"]:
             return self._ST_topics_Movies(hl=hl,gl=gl,continuation_token=continuation_token)
-        elif kw in ["tv","show","shows"]:
+        elif kw in ["tv","show","shows","tv shows","tv show"]:
             return self._ST_topics_TV(hl=hl,gl=gl,continuation_token=continuation_token)
         elif kw in ["education","edu"]:
             return self._ST_topics_Education(hl=hl,gl=gl,continuation_token=continuation_token)
