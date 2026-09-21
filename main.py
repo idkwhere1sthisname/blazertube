@@ -11,7 +11,6 @@ import requests
 from werkzeug.serving import WSGIRequestHandler
 from werkzeug.middleware.proxy_fix import ProxyFix
 from xml.etree import ElementTree as ET
-import warnings
 from urllib.parse import urlencode, unquote, quote
 import ssl
 from functools import wraps
