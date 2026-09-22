@@ -65,6 +65,7 @@ See [this](https://github.com/idkwhere1sthisname/blazertube/blob/master/self_hos
 - Viewing personal playlists
 - Actual channel topics (instead of it being a shortcut to search)(?)
 - Adding inbox and social if possible
+- Creating playlists
 
 ## Credits
 
