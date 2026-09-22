@@ -60,6 +60,7 @@ FLASK_SECRET_KEY=[...]
 2. Run `nasc.py`, then choose the port (default and recommended port is `9000`)
 3. Run `proxy.py`, then choose the port (default and recommended port is `8080`), then follow the instructions there
 4. Run `dns.py` (default hardcoded port is `53`)
+5. Finally, you must setup the proxy and DNS settings on your 3DS to point to the IP shown there
 
 ## Self hosting Hulu Plus (3DS)
 
