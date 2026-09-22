@@ -29,6 +29,7 @@ FLASK_SECRET_KEY=[...]
 
 > [!IMPORTANT]
 > To avoid YouTube blocking your IP, you should also export your own [cookies](https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp).
+> 
 > Running the server on HTTPS has not been tested
 
 ### Self hosting (Pretendo Network)
