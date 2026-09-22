@@ -18,7 +18,7 @@
     - Setting up a [virtual environment](https://docs.python.org/3/library/venv.html) is recommended before running this
 5. Rename `.env.example` to `.env` and add a YouTube Data API v3 key
     - **Despite most of the server being InnerTube-based, some functions are Data API based. (e.g. browsing recommended channels)**
-6. Run `main.py` to create a basic configuration file
+6. **Run `main.py` to create a basic configuration file**
 7. Once done, add a secret Flask key (that you shouldn't share!) to `.env` (the server automatically gives you one if it doesn't detect it), it must be added to `.env` with this syntax:
 
 ```env
@@ -39,6 +39,7 @@ FLASK_SECRET_KEY=[...]
 
 1. Run `/patcher/patcher.py` to create a patched binary or IPS for 3DS consoles.
 2. Follow the instructions shown there
+3. Once done, run `main.py` to start the server
 
 ### Self hosting (without Pretendo Network)
 
