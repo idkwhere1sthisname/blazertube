@@ -1,4 +1,4 @@
-from __future__ import print_function, annotations
+from __future__ import print_function, annotations, absolute_import
 from flask import Flask, redirect, render_template, request, Response, send_from_directory, abort
 from flask_cors import cross_origin
 from flask_compress import Compress
@@ -176,12 +176,8 @@ if __name__ == "__main__":
         disable_warnings(DeprecationWarning)
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.set_ciphers("ALL:@SECLEVEL=0")
-        try:
-            context.minimum_version = ssl.TLSVersion.TLSv1
-            context.maximum_version = ssl.TLSVersion.TLSv1
-        except:
-            context.minimum_version = ssl.TLSVersion.TLSv1_2
-            context.maximum_version = ssl.TLSVersion.TLSv1_2
+        context.minimum_version = ssl.TLSVersion.TLSv1
+        context.maximum_version = ssl.TLSVersion.TLSv1
         if not pempath.is_file():
             print("PEM certificate not found.")
             sys.exit(-1)

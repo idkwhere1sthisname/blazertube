@@ -1,4 +1,4 @@
-from __future__ import print_function, annotations
+from __future__ import print_function, annotations, with_statement, absolute_import
 import requests
 import re
 import json
@@ -7,12 +7,17 @@ import socket
 import requests
 from pathlib import Path
 import warnings
+import os
+import sys
+import colorama
 from typing import Literal
 
 from shared import *
 
 BASE = Path(__file__).resolve().parent
 CLIENTS = Literal["WEB","TV"]
+colorama.init(autoreset=True)
+Fore = colorama.Fore
 
 def getThumbnail(videoId):
     url = f"http://i.ytimg.com/vi/{videoId}/mqdefault.jpg"
@@ -218,3 +223,28 @@ def get_innertube_key(fallback,client:CLIENTS="TV"):
     if not upd_api_key:
         return fallback,True,httpcd
     return upd_api_key,False,httpcd
+
+def update_innertube_key(innertubeKey):
+    print(f"{Fore.BLUE}[info]{Fore.RESET} Checking if the InnerTube API key is up to date...")
+    upd_api_key,isfallback,httpcd = get_innertube_key(innertubeKey,"TV")
+    if isfallback:
+        if httpcd == 200:
+            print(f"{Fore.RED}[error]{Fore.RESET} Using fallback key, YouTube did not return a valid key")
+        else:
+            print(f"{Fore.RED}[error]{Fore.RESET} Using fallback key, couldn't contact YouTube (HTTP {httpcd})")
+    else:
+        if upd_api_key == innertubeKey:
+            print(f"{Fore.BLUE}[info]{Fore.RESET} InnerTube API key is up to date (HTTP {httpcd})")
+    if not isfallback and upd_api_key != innertubeKey:
+        print(f"{Fore.BLUE}[info]{Fore.RESET} Updating InnerTube key (old: {innertubeKey}, new: {upd_api_key})")
+        with open(".env", "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        with open(".env", "w", encoding="utf-8") as f:
+            for line in lines:
+                if line.startswith("INNERTUBE_KEY="):
+                    f.write(f"INNERTUBE_KEY={upd_api_key}\n")
+                else:
+                    f.write(line)
+        os.environ["INNERTUBE_KEY"] = upd_api_key
+        print(f"{Fore.GREEN}[info]{Fore.RESET} ""InnerTube key updated, reloading...")
+        os.execv(sys.executable, [sys.executable] + sys.argv)

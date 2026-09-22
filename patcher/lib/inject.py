@@ -1,5 +1,5 @@
 # based off of Vii No Ma's Hulu Plus HTML injector
-from __future__ import print_function
+from __future__ import print_function, annotations, absolute_import, with_statement
 import zlib
 import os
 import re

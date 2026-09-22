@@ -28,12 +28,11 @@ UPDATE 22/08/2026 (dd.mm.yyyy): WE GOT PAST PING ON THE NETFLIX WII DISK!!!
 IT IS NOW STUCK AT REGISTER (after ecclinkprovision and preregister).
 Not much on 3DS Netflix unfortunately.
 """
-from __future__ import print_function
+from __future__ import print_function, with_statement, absolute_import
 import ips
 from pathlib import Path
 import sys
 import shutil
-import stat
 
 from lib.patcher_shared import *
 

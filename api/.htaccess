@@ -7,6 +7,7 @@ ErrorDocument 404 /errors/404.html
 ErrorDocument 403 /errors/403.html
 ErrorDocument 500 /errors/500.html
 <IfModule mod_headers.c>
+    Header unset X-Powered-By
     Header always unset X-Powered-By
     Header set Referrer-Policy "strict-origin-when-cross-origin"
     Header set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet"

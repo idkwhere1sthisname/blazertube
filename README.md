@@ -33,29 +33,9 @@ You can alternatively scan this QR code with [Universal Updater](https://univers
 
 This allows you to install updates to BlazerTube without having to manually replace the binary in your system.
 
-## Self hosting your own instance
+## Self hosting
 
-Requirements:
-
-- Python 3.12 or newer and pip
-- Node.js 26 or newer (to install Deno)
-- ffmpeg
-
-1. Install [Node.js](https://nodejs.org/), [Python](https://www.python.org/downloads/) 3.12 or newer and [ffmpeg](https://ffmpeg.org/) if you haven't already.
-2. Install [Deno](https://docs.deno.com/runtime/getting_started/installation/) and [pip](https://pip.pypa.io/en/stable/installation/) too, if you haven't already.
-3. Clone the repo or download it:
-    - `git clone https://github.com/idkwhere1sthisname/blazertube`
-4. Install the Python dependencies by running `pip install -r requirements.txt`
-5. Rename `.env.example` to `.env` and add a YouTube Data API v3 key
-    - **Despite most of the server being InnerTube-based, some functions are Data API based. (e.g. browsing recommended channels)**
-6. Optionally run `/patcher/patcher.py` to create a patched binary.
-7. To avoid YouTube blocking your IP, you should also export your own [cookies](https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp).
-8. Run the Python server to create a configuration file
-9. Once done, add a secret Flask key (that you shouldn't share!) to `.env` (the server automatically gives you one if it doesn't detect it), it must be added to `.env` with this syntax:
-
-```env
-FLASK_SECRET_KEY=[...]
-```
+See [this](https://github.com/idkwhere1sthisname/blazertube/blob/master/self_host_guide.md) guide to self host your own instance
 
 ## Working features
 

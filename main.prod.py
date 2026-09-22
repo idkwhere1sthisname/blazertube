@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, with_statement, division, absolute_import
 import waitress
 import sys
 from pathlib import Path
@@ -13,7 +13,7 @@ from main import app as yt_prodapp, set_external_API_url, set_version_subpath, s
 from maint_server import app as yt_maintapp
 from hulu_server import app as huluapp
 from netflix_server import app as netflixapp
-from functions import showlanip, clearscreen, get_innertube_key
+from functions import showlanip, clearscreen, update_innertube_key
 from shared import *
 from video import GetVideo
 
@@ -197,22 +197,7 @@ if __name__ == "__main__":
             thread = threading.Thread(target=cleanup_schedule,daemon=True,name="btvidcleanupd")
             thread.start()
             if not ENABLE_CREDS_OVERRIDE:
-                upd_api_key,isfallback,httpcd = get_innertube_key(INNERTUBE_KEY,"TV")
-                print(f"{Fore.BLUE}[info]{Fore.RESET} Checking if the InnerTube API key changed...",flush=True)
-                if not isfallback and upd_api_key != INNERTUBE_KEY:
-                    with open(".env","r",encoding="utf-8") as f:
-                        lines = f.readlines()
-                    with open(".env","w",encoding="utf-8") as f:
-                        for l in lines:
-                            if l.startswith("INNERTUBE_KEY="):
-                                f.write(f"INNERTUBE_KEY={upd_api_key}\n")
-                            else:
-                                f.write(l)
-                    os.environ["INNERTUBE_KEY"] = upd_api_key
-                    print(f"{Fore.BLUE}[info]{Fore.RESET} InnerTube API key updated, reloading...")
-                    os.execv(sys.executable, [sys.executable] + sys.argv)
-                else:
-                    print(f"{Fore.BLUE}[info]{Fore.RESET} InnerTube API key is up to date...")
+                update_innertube_key(INNERTUBE_KEY)
             set_external_API_url("https","lbl-api.idkwh.ct8.pl","443")
             set_version_subpath("api/ctr/GetVersion.php")
             set_versioned_xlb_subpath("api/ctr/GetVersionedXLB.php")

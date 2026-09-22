@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, annotations, with_statement, absolute_import
 import tempfile
 from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound, TranscriptsDisabled, IpBlocked, RequestBlocked
 from xml.sax.saxutils import escape

@@ -1,6 +1,6 @@
 # script used for development before Pretendo enabled NASC for YouTube
 # useful if you don't want error 002-0110 thrown at your face every 2 seconds while using Hulu Plus
-from __future__ import print_function
+from __future__ import print_function, annotations, absolute_import
 from flask import Flask, Response, request, abort
 from flask_ipban import IpBan
 from flask_cors import cross_origin
