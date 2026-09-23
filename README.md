@@ -65,6 +65,16 @@ See [this](https://github.com/idkwhere1sthisname/blazertube/blob/master/self_hos
 - Viewing personal playlists
 - Actual channel topics (instead of it being a shortcut to search)(?)
 - Adding inbox and social if possible
+- Creating playlists
+
+## FAQ
+
+- Videos don't play / play with lag (o3DS) on the public instance
+    - This is a known bug, and it will be fixed eventually
+
+## Support
+
+Open an issue describing clearly the problem you're facing. Remember to add information like your Python version and OS.
 
 ## Credits
 
