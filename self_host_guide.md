@@ -1,4 +1,4 @@
-<!-- markdownlint-disable MD033 MD059 MD007 -->
+<!-- markdownlint-disable MD007 MD009 MD033 MD059 -->
 # Self hosting your own instance
 
 ## Requirements (applies to every guide here)

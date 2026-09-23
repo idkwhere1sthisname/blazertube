@@ -1,4 +1,4 @@
-<!-- markdownlint-disable MD033 MD059 MD007 -->
+<!-- markdownlint-disable MD007 MD009 MD033 MD059 -->
 # <div align="center">BlazerTube</div><p>
 
 <div align="center">
