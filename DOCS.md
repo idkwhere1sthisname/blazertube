@@ -32,7 +32,7 @@ Disables the sign in feature
 SIGNINDISABLED_REASON: LiteralString = "Sign-Ins are disabled by an administrator."
 ```
 
-Shown in the sign in disabled page, and only applies when sign ins are disables
+Shown in the sign in disabled page, and only applies when sign ins are disabled
 
 ```py
 ENABLE_CLEAR_MEMORY_BTN: Literal[True, False] = False
