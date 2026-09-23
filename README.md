@@ -35,7 +35,7 @@ This allows you to install updates to BlazerTube without having to manually repl
 
 ## Self hosting
 
-See [this guide](/self_host_guide.md) to learn how self host your own instance, and [this](DOCS.md) documentation if you want to know how the apps work
+See [this guide](/self_host_guide.md) to learn how self host your own instance, and [these docs](DOCS.md) if you want to know how the apps and backend work
 
 ## Working features
 
