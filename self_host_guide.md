@@ -77,6 +77,7 @@ FLASK_SECRET_KEY=[...]
 
 > [!NOTE]
 > Setting up a custom proxy and NASC server is required since Pretendo has not enabled NASC for Hulu Plus or Netflix
+> 
 > You could theoretically use Hulu Plus without a custom NASC server, but it'll show error code 002-0110 every 2-3 seconds
 
 ## Self hosting Netflix (3DS)
