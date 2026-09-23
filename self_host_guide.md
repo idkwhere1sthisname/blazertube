@@ -97,5 +97,8 @@ FLASK_SECRET_KEY=[...]
 > [!IMPORTANT]
 > You must run the development server of the app you want to run at least once before running the production server
 
-1. Run `main.prod.py`, then follow the instructions there
-2. Optionally use an external server as a reverse proxy (e.g. [Nginx](https://nginx.org/))
+1. **Run `main.py` to create a basic configuration file first** (if you haven't already done so)
+2. When prompted, do not enable debug mode
+    - If you already ran the main Python server, open `config.xml` and set `debugging` to `false`
+3. Run `main.prod.py`, then follow the instructions there
+4. Optionally use an external server as a reverse proxy (e.g. [Nginx](https://nginx.org/))
