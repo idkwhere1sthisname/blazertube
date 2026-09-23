@@ -77,7 +77,7 @@ vod.showProgressSpinner(show);
 Shows a spinner on the top screen under the YouTube logo, it is hidden by calling the same function with `false` as an argument
 
 ```js
-vod.showSpinnerWithoutBackground(xpos,ypos);
+vod.showSpinnerWithoutBackground({xpos:...,ypos:...});
 ```
 
 Shows a spinner on the bottom screen, it is hidden by calling the same function with `0` as an argument
