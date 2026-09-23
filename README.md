@@ -35,7 +35,7 @@ This allows you to install updates to BlazerTube without having to manually repl
 
 ## Self hosting
 
-See [this](https://github.com/idkwhere1sthisname/blazertube/blob/master/self_host_guide.md) guide to self host your own instance
+See [this guide](/self_host_guide.md) to learn how self host your own instance, and [this](DOCS.md) documentation if you want to know how the apps work
 
 ## Working features
 
@@ -91,8 +91,8 @@ python -c "import platform; print('python version:', platform.python_version(), 
 
 [NebulaGamez](https://github.com/nebnebgamez): Developer
 
-[Tanjirokamado12](https://github.com/Tanjirokamado12): [Inject](https://github.com/idkwhere1sthisname/blazertube/blob/master/patcher/lib/inject.py) portion of the patcher
+[Tanjirokamado12](https://github.com/Tanjirokamado12): [Inject](/patcher/lib/inject.py) portion of the patcher
 
-[Liinback](https://github.com/liinbacklite): [Video loader](https://github.com/idkwhere1sthisname/blazertube/blob/master/video.py), [captions](https://github.com/idkwhere1sthisname/blazertube/blob/master/captions.py), [debug](https://github.com/idkwhere1sthisname/blazertube/blob/master/debug.py) and small portions of [youtubei.py](https://github.com/idkwhere1sthisname/blazertube/blob/master/youtubei.py). The captions and video modules are based off of [Liinback 3.5](https://github.com/liinbacklite/Liinback)'s implementation, while the debug module is based on Liinback 3.0's implementation.
+[Liinback](https://github.com/liinbacklite): [Video loader](/video.py), [captions](/captions.py), [debug](/debug.py) and small portions of [youtubei.py](/youtubei.py). The captions and video modules are based off of [Liinback 3.5](https://github.com/liinbacklite/Liinback)'s implementation, while the debug module is based on Liinback 3.0's implementation.
 
-[RiiviveTube](https://github.com/ReviveMii/RiiviveTube): Portions of [youtubei.py](https://github.com/idkwhere1sthisname/blazertube/blob/master/youtubei.py)
+[RiiviveTube](https://github.com/ReviveMii/RiiviveTube): Portions of [youtubei.py](/youtubei.py)
