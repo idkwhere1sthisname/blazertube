@@ -89,13 +89,9 @@ PARAM_PLAYLIST_CREATE   = "CAAoAA%3D%3D"
 
 # advanced options
 SIGNINDISABLED          = False
-"""disables sign ins."""
 SIGNINDISABLED_REASON   = ""
-"""reason why sign ins are disabled. it'll show up in the sign ins disabled page."""
 ENABLE_CLEAR_MEMORY_BTN = False
-"""this option enables a button that deletes every cookie that has been set. It only shows up when the user is signed out. Similar to going to http://embedded.wii/launcher.html?clear_local_data=1 on previous VOD apps. (3DS only, doesn't show up on normal browsers)"""
 ENABLE_DUMMY_SIGNIN     = False
-"""uses fake credentials instead of requesting Google for them. useful for designing the sign in page."""
 
 # other
 CFG_NAMESPACE_STR       = "urn:bt.config"

@@ -76,6 +76,15 @@ See [this](https://github.com/idkwhere1sthisname/blazertube/blob/master/self_hos
 
 Open an issue describing clearly the problem you're facing. Remember to add information like your Python version and OS.
 
+To get information about your OS and Python version, run the following in the terminal:
+
+```bash
+python -c "import platform; print('python version:', platform.python_version(), '(build', platform.python_build()), '\nuname:', platform.uname())"
+# (e.g.)
+# -> python version: 3.13.13 (build ('tags/v3.13.13:01104ce', 'Apr  7 2026 19:25:48')
+# -> uname: uname_result(system='Windows', node='PC-NAME', release='11', version='10.0.26200', machine='AMD64')
+```
+
 ## Credits
 
 [idkwh](https://github.com/idkwhere1sthisname): Developer
