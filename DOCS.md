@@ -51,7 +51,7 @@ Uses fake credentials and does NOT contact YouTube for the OAuth2 activation cod
 > [!NOTE]
 > Also check out this [3DBrew](https://3dbrew.org/wiki/YouTube) page! it has info about how the DNS redirection works on Revision 1 of the app, but not on the newer versions, and more.
 
-The 3DS YouTube app (similar to the Wii VOD apps such as Crunchyroll or Amazon Instant Video) uses a downgraded WebKit port (possibly) by [Factory Media Production](https://www.northdata.de/FactorY%20Media%20Production%20GmbH,%20K%C3%B6ln/HRB%2070454) or Factor 5. Again, similar to the Wii VOD apps, it has a Netscape Plugin embedded in the app.
+The 3DS YouTube app (similar to the Wii VOD apps such as Crunchyroll or Amazon Instant Video) uses a downgraded WebKit port by [FactorY Media Production GmbH](https://www.northdata.de/FactorY%20Media%20Production%20GmbH,%20K%C3%B6ln/HRB%2070454). Again, similar to the Wii VOD apps, it has a Netscape Plugin embedded in the app.
 
 Most of the functions don't do anything (presumably because the class has been ported 1:1 from the Wii apps), but a few actually do something:
 
