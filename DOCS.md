@@ -51,7 +51,7 @@ Uses fake credentials and does NOT contact YouTube for the OAuth2 activation cod
 > [!NOTE]
 > Also check out this [3DBrew](https://3dbrew.org/wiki/YouTube) page! it has info about how the DNS redirection works on Revision 1 of the app, but not on the newer versions, and more.
 
-The 3DS YouTube app, (similar to the Wii VOD apps such as Crunchyroll or Amazon Instant Video) use a downgraded WebKit port (possibly) by [Factory Media Production](https://www.northdata.de/FactorY%20Media%20Production%20GmbH,%20K%C3%B6ln/HRB%2070454) or Factor 5. Again, similar to the Wii VOD apps, it has a Netscape Plugin embedded in the app.
+The 3DS YouTube app (similar to the Wii VOD apps such as Crunchyroll or Amazon Instant Video) uses a downgraded WebKit port (possibly) by [Factory Media Production](https://www.northdata.de/FactorY%20Media%20Production%20GmbH,%20K%C3%B6ln/HRB%2070454) or Factor 5. Again, similar to the Wii VOD apps, it has a Netscape Plugin embedded in the app.
 
 Most of the functions don't do anything (presumably because the class has been ported 1:1 from the Wii apps), but a few actually do something:
 
@@ -131,15 +131,15 @@ See [common.js](static/js/common.js) for the full FlexView/InputMask constants (
 The app also has some built in pages (e.g. the white page with the loading screen) running on a pseudo-web server (`http://embedded.ctr`). Any invalid URL will refuse to load
 
 | Page              | Description                                                                                                                                   |
-|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| launcher.html     | App launcher, it's the only one ZLIB compressed in the binary, it is responsible for opening the app URL and setting the time from the server |
-| miiverse.html     | Blank page, but has a Miiverse icon on top (X = Miiverse?), it was never used in the app, but it was probably a planned feature               |
-| playbackctrl.html | Houses the little seek bar, play and subtitles icon when you play a video on the app, if you access it directly, it will be broken            |
-| choice.html       | Contains and saves the subtitles options when you play a video, it will be broken if accessed directly                                        |
-| error.html        | Blank page                                                                                                                                    |
-| error-min.html    | Blank page                                                                                                                                    |
-| pdchoice.html     | Blank page and untested, may be trying to contact a defunct server (`http://172.18.1.30/youtube/videoControls/choice.html`)                   |
-| loading.html      | Blank page                                                                                                                                    |
+|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| launcher.html     | App launcher, it's the only ZLIB compressed HTML in the binary, it is responsible for opening the app URL and setting the time from the server      |
+| miiverse.html     | Blank page, but has a Miiverse icon on top (X = Miiverse?), it was never used in the app, but it was probably a planned feature                     |
+| playbackctrl.html | Houses the little seek bar, play and subtitles icon when you play a video on the app, if you access it directly, it will be broken                  |
+| choice.html       | Contains and saves the subtitles options when you play a video, it will be broken if accessed directly                                              |
+| error.html        | Blank page                                                                                                                                          |
+| error-min.html    | Blank page                                                                                                                                          |
+| pdchoice.html     | Blank page and untested, may be trying to contact a defunct server (`http://172.18.1.30/youtube/videoControls/choice.html`)                         |
+| loading.html      | Blank page                                                                                                                                          |
 
 > [!NOTE]  
 > On previous VOD apps, you were able to delete your cookies by visiting `http://embedded.wii/?clear_local_data=1`, this is why the `ENABLE_CLEAR_MEMORY_BTN` [advanced option](#advanced-configuration) was implemented in the first place.
