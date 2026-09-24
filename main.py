@@ -97,7 +97,7 @@ HTMLpaths        = "account_recovery auth_sub_request create_account create_chan
 # ln. 77, col 281 in swatch module, these are parsed by HTML so they can be recreated theoretically
 # NOTE: flag is in another path but it uses the same system
 allpaths         = "account_notifications account_privacy account_revert account_switcher inbox my_playlists my_videos offer_details paid_unsubscribe_confirmation post_purchase_confirmation subscription_manager account_recovery auth_sub_request create_account create_channel eval identity_merge_done merge_identity merge_identity_done oauth_authorize_token oops remote_error signin terms verify_age verify_controversy channel_switcher credits".split(" ")
-NOT_IMPLEMENTED  = "account_revert account_notifications account_privacy account_switcher inbox my_playlists offer_details paid_unsubscribe_confirmation post_purchase_confirmation account_recovery auth_sub_request create_account create_channel identity_merge_done merge_identity merge_identity_done oauth_authorize_token oops remote_error signin terms verify_age verify_controversy channel_switcher".split(" ")
+NOT_IMPLEMENTED  = "account_revert account_notifications account_privacy account_switcher inbox my_playlists offer_details paid_unsubscribe_confirmation post_purchase_confirmation account_recovery auth_sub_request create_account create_channel identity_merge_done merge_identity merge_identity_done oauth_authorize_token remote_error signin terms verify_age verify_controversy channel_switcher".split(" ")
 # https://web.archive.org/web/20130330172122/http://m.youtube.com/remote_error
 # https://web.archive.org/web/20130317103105/http://m.youtube.com/oops
 # https://web.archive.org/web/20140302004802/http://www.youtube.com/account_recovery
@@ -3093,6 +3093,27 @@ def maintenance():
         return Response(render_template("maintenance.html",debug=debugmode),status=200,headers={"Content-Type":"text/html; charset=utf-8"})
     else:
         abort(404)
+
+@app.route("/oops")
+@checkifajax
+def oopspage():
+    htmlInner = render_template("components/oops.html")
+    signed_in_username = signed_in_email = ""
+    if g.SIGNED_IN:
+        signed_in_email = g.INFO["email"]
+        signed_in_username = g.INFO["name"]
+    timestamp = int(time.time())
+    return funcmod.make_HTMLOnly_AJAX_response(htmlInner,timestamp,signed_in_username=signed_in_username,signed_in_email=signed_in_email)
+
+@app.route("/youtube/videoControls/choice.html")
+def dbgchoice():
+    ua = request.headers.get("User-Agent","-")
+    if IS_3DS(ua):
+        region = GET_REGION_UA(ua)
+        if region not in ["US","EU","JP"]:
+            return abort(404)
+        return Response(render_template("components/choice.html"))
+    return abort(404)
 
 # before/after request
 @app.before_request

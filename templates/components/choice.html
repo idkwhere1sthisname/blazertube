@@ -1,0 +1,741 @@
+<html>
+	<head>
+	<style>
+		.myButton {
+			position: relative;
+			min-height: 34px;
+			line-height: 34px;
+			display: inline-block;
+			border: 1px solid #d6d6d6;
+			border-bottom-color: #c6c6c6;
+			padding: 0 9px;
+			color: #333;
+			width: 280px;
+			font-size: 12px;
+			text-align: center;
+			-moz-border-radius: 2px;
+			-webkit-border-radius: 2px;
+			border-radius: 2px;
+			background: #eeeeee;
+			background: -webkit-gradient(linear,left top,left bottom,from(#f3f3f3),to(#e8e8e8));
+			background: -moz-linear-gradient(top,#f3f3f3,#e8e8e8);
+			background: -ms-linear-gradient(top,#f3f3f3,#e8e8e8);
+			background: -webkit-linear-gradient(top,#f3f3f3,#e8e8e8);
+			background: -o-linear-gradient(top,#f3f3f3,#e8e8e8);
+			background: linear-gradient(to bottom,#f3f3f3,#e8e8e8);
+		}
+		.myButton:active{
+			border-color:#c6c6c6;
+			background:#ddd;
+		}
+		.myButtonDep {
+			border-color:#c6c6c6;
+			background:#ddd;
+		}
+		.settingsButton {
+			width:280px;
+		}
+		.save_resetButton {
+			width: 100px;
+		}
+		#cc_choice {
+			background-color: rgb(241, 241, 241);
+			border-radius: 2px;
+			width:300px;
+			text-align: center;
+		}
+		.buttonWrapper {
+			position:relative;
+			width: 280px;
+			margin: 0px auto;
+
+		}
+		.sButton {
+			text-align: left;
+		}
+		.settingsContainer {
+			position: relative;
+			width:272px;
+			overflow: hidden;
+		}
+		.settingColorRep {
+			position: relative;
+			width:18px;
+			height:18px;
+			margin: 6px 0px;
+			float: right;
+			background: rgb(0,0,0);
+			border: 2px gray solid;
+			border-radius: 2px;
+			-webkit-border-radius: 2px;
+		}
+		.settingRep {
+			position: relative;
+			float: right;
+			margin: 2px 2px;
+			width:18px;
+			height: 18px;
+		}
+		.circleChoice {
+			border-radius: 12px;
+			width:12px;
+			height:12px;
+		}
+		.circleChoiceInner {
+			border-radius: 8px;
+			-webkit-border-radius: 8px;
+			width:8px;
+			height:8px;
+			margin: 2px;
+			border: 0px;
+			float: left;
+		}
+		.individualColorSetting {
+			float: left;
+			background: none;
+			margin: 6px 3px;
+		}
+		.settingsChoice {
+			float: left;
+			margin: 4px;
+		}
+		ul {
+			margin:0px;
+			padding:0px;
+		}
+		.verticalUL {
+			list-style: none;
+			clear: both;
+		}
+		.black {
+			background: black;
+		}
+		.blue {
+			background: #0066FF;
+		}
+		.green {
+			background: #00FF00;
+		}
+		.aqua {
+			background: #00FFFF;
+		}
+		.red {
+			background: red;
+		}
+		.purple {
+			background: purple;
+		}
+		.yellow {
+			background: yellow;
+		}
+		.white {
+			background: white;
+		}
+		.float_left {
+			float: left;
+		}
+		.slider {
+			position: relative;
+			width: 268px;
+			height: 30px;
+		}
+		.sliderbar {
+			position:relative;
+			width: 220px;
+			height: 8px;
+			top: 12px;
+			left: 10px;
+			z-index: 0;
+			background-color: black; 
+		}
+		.slider_scrubber_overlay {
+			position: absolute;
+			height: 30px;
+			background-color: transparent;
+			top:0px;
+			z-index: 2
+		}
+		.slider_scrubber_img {
+			position: absolute;
+			width:26px;
+			height: 26px;
+			z-index: 1;
+			top: 3px;
+			left: 10px;
+		}
+	</style>
+	<script>
+		var mouseDown;
+		var parentWindow;
+		var ccSettingsDefaults;
+		var ccSettingsCurrent;
+		var captionsView;
+		var currentSettings = {}, currentOpenSetting;
+	
+		
+
+		/* Sets the defaults for all settings */
+		function setCCDefaults() {
+			var listRows = document.getElementById('caption_settings').getElementsByTagName('li');
+			var listDivs = [];
+			for(var i = 0; i <= listRows.length - 1; i++){
+				var listDiv = listRows[i].getElementsByTagName('div');
+				if(listDiv.length > 0) {
+					for(var k = 0; k <= listDiv.length - 1; k++){
+						for(_default in ccSettingsCurrent){
+							/* Handle options */
+							if(listDiv[k].id.search('inner') !== -1) {
+								if(listDiv[k].id.search(_default + '_' + ccSettingsCurrent[_default]) !== -1 ){
+									listDiv[k].style.display = 'block';
+									currentSettings[_default] = listDiv[k];
+									break;
+								} else {
+									listDiv[k].style.display = 'none';
+								}
+							}
+						}
+					}
+				}
+			}
+			var Divs = document.getElementById('caption_settings').getElementsByTagName('button');
+			for(var i = 0; i <= Divs.length - 1; i++){
+				var Divvs = Divs[i].getElementsByTagName('div')[0];
+				if(typeof(Divvs) !== 'undefined' && Divvs.id.search('color') !== -1 && Divvs.id.search('scr') !== -1) {
+						var divvsIdSplit = Divvs.id.split('_');
+						var firstPart = divvsIdSplit[0];
+						var secondPart = divvsIdSplit[1];
+						var together = firstPart + '_' + secondPart;
+						Divvs.style.backgroundColor = ccSettingsCurrent[together];
+
+				}
+			}
+			var sliderImgs = document.getElementById('caption_settings').getElementsByTagName('img');
+			for(var i = 0; i <= sliderImgs.length - 1; i++) {
+				if(sliderImgs[i].id.search('slider') !== -1) {
+					var cImg = sliderImgs[i];
+					var color = sliderImgs[i].id.split('_')[3];
+					var cSetting = sliderImgs[i].id.split('_')[0] + '_' + sliderImgs[i].id.split('_')[1];
+					cImg.style.left = ccSettingsCurrent.sliderPositions[cSetting][color];
+				}
+			}
+			var sliderBars = document.getElementById('caption_settings').getElementsByTagName('div');
+			for(var i = 0; i <= sliderBars.length - 1; i++) {
+				if(sliderBars[i].id.search('slider') !== -1 && sliderBars[i].id.search('bar') !== -1) {
+					var cBar = sliderBars[i];
+					var color = cBar.id.split('_')[3];
+					var cSetting = cBar.id.split('_')[0] + '_' + cBar.id.split('_')[1];
+					if(color === 'red' ) {
+						var rgbValue = 'rgb('+ ccSettingsCurrent.sliderColors[cSetting].red + ',0,0)';
+					} else if(color === 'green') {
+						var rgbValue = 'rgb(0,' + ccSettingsCurrent.sliderColors[cSetting].green + ',0)';
+					} else {
+						var rgbValue = 'rgb(0,0,' + ccSettingsCurrent.sliderColors[cSetting].blue + ')';
+					}
+					cBar.style.backgroundColor = rgbValue;
+
+				}
+			}
+			ccSettingsCurrent.s_textsize = 12;
+			document.getElementById('s_textsize_src').innerHTML = '12';
+			parentWindow.pushUpdate();
+		}
+
+		
+
+		/* Settings choice handler */
+		function handleSettingClick(evt) {
+			var container = evt.srcElement.id.replace('Button','');
+			if(container.search('save') === -1 && container.search('reset') === -1) {
+				if(!container) {
+					container = evt.srcElement.parentNode.id.replace('Button','');
+				}
+				container = document.getElementById(container + '_container');
+				if(container.style.display === 'block') {
+					container.style.display ='none';
+				}
+				else {
+					container.style.display = 'block';
+					if(currentOpenSetting && currentOpenSetting.id !== container.id) {
+						currentOpenSetting.style.display = 'none';
+					}
+					currentOpenSetting = container;
+				}
+			} else if(container.search('save') !== -1) {
+				parentWindow.debuglog('save');
+				var saveSettings = JSON.stringify(ccSettingsCurrent);
+				parentWindow.localStorage.setItem('yt_cc_settings',saveSettings);
+			} else {
+				parentWindow.debuglog('reset');
+				parentWindow.localStorage.removeItem('yt_cc_settings');
+				parentWindow.ccSettingsCurrent = ccSettingsCurrent = JSON.parse(JSON.stringify(ccSettingsDefaults));
+				setCCDefaults();
+			}
+			//parentWindow.pushUpdate();
+		}
+
+		/* Color choice handler */
+		function handleColorClick(evt){
+			var colorId = evt.srcElement.id;
+			var settingDisplayId = colorId.split('_')[0] + '_' + colorId.split('_')[1];
+			var settingDisplay = document.getElementById(settingDisplayId + '_scr');
+			settingDisplay.className = 'settingColorRep ' + colorId.split('_')[3];
+			ccSettingsCurrent[settingDisplayId] = colorId.split('_')[3];
+		}
+		
+		/* Any non-color choice handler */
+		function handleChoiceClick(evt) {
+			var choiceId = evt.srcElement.id;
+			var choiceIdSplit = choiceId.split('_');
+			var masterId = choiceIdSplit[0] + '_' + choiceIdSplit[1];
+			var innerCircleId = choiceIdSplit[0] + '_' + choiceIdSplit[1] + '_' + choiceIdSplit[3] +'_circle_inner';
+			var innerCircle = document.getElementById(innerCircleId);
+			if(masterId === 's_textsize') {
+				var adjustment = 4;
+				if(choiceIdSplit[3] === 'up') {
+					if(ccSettingsCurrent[masterId] < 15) {
+						ccSettingsCurrent[masterId] += 1;
+						if(ccSettingsCurrent[masterId] >= 14) {
+							captionsView.setY(captionsView.getY() - adjustment,0,0);
+							ccSettingsCurrent.ccSettingsChanged[masterId] = true;
+						}
+					}
+					
+				}
+				else if(choiceIdSplit[3] === 'down') {
+					if(ccSettingsCurrent[masterId] > 9) {
+						ccSettingsCurrent[masterId] -= 1;
+						if(ccSettingsCurrent[masterId] >= 13) {
+							captionsView.setY(captionsView.getY() + adjustment,0,0);
+							ccSettingsCurrent.ccSettingsChanged[masterId] = true;
+						}
+					}
+				}
+				document.getElementById(masterId + '_src').innerHTML = ccSettingsCurrent[masterId];
+			}
+			else {
+				currentSettings[masterId].style.display = 'none';
+				ccSettingsCurrent.ccSettingsChanged[masterId] = true;
+				innerCircle.style.display = 'block';
+				currentSettings[masterId] = innerCircle;
+				ccSettingsCurrent[masterId] = choiceIdSplit[3];
+			}
+			parentWindow.pushUpdate();
+		}
+
+		function handleColorMouseDown() {
+			mouseDown = true;
+			parentWindow.debuglog('mousedown');
+		}
+		function handleColorMouseUp() {
+			mouseDown = false;
+			parentWindow.debuglog('mouseup');
+		}
+		function handleColorMouseMove(evt) {
+			if(mouseDown){
+				var colorId = evt.srcElement.id;
+				var colorIdSplit = colorId.split('_');
+				var settingDisplayId = colorIdSplit[0] + '_' + colorIdSplit[1] + '_' + colorIdSplit[2] + '_' + colorIdSplit[3];
+				var settingDisplay = document.getElementById(colorIdSplit[0] + '_' + colorIdSplit[1] + '_scr');
+				var slider, sliderBar, scrubber, colorValue, colorProp, sliderValue;
+				var sliderBar = document.getElementById(settingDisplayId + '_bar');
+				var slider = document.getElementById(settingDisplayId + '_scrubber_overlay');
+				var scrubber = document.getElementById(settingDisplayId + '_scrubber_img');
+				var style = window.getComputedStyle(settingDisplay);
+				var colors = style.getPropertyValue('background-color').replace('rgb(','').replace(')','').replace(' ','').replace(', ',',');
+				var colorSplit = colors.split(',');
+				var red = parseInt(colorSplit[0]);
+				var green = parseInt(colorSplit[1]);
+				var blue = parseInt(colorSplit[2]);
+				var leftBound = 20;
+				var rightBound = slider.offsetWidth + 10;
+				if(evt.pageX - 9 >= leftBound && evt.pageX <= rightBound) {
+					sliderValue = evt.pageX - 22;
+					scrubber.style.left = sliderValue;
+					var fp = evt.pageX - (sliderBar.offsetLeft + 7 + (scrubber.offsetWidth / 2));
+					var sp = sliderBar.offsetWidth - scrubber.offsetWidth;
+					colorValue = Math.ceil((fp / sp) * 255);
+					if(colorValue > 255) colorValue = 255;
+					if(colorValue < 0) colorValue = 0;
+					colorProp = colorId.split('_')[0] + '_' + colorId.split('_')[1];
+					if(colorId.split('_')[3] === 'red') {
+						var newColorValue = 'rgba(' + colorValue + ',' + green + ',' + blue + ',' + ccSettingsCurrent.s_bgalpha +')';
+						var barColorValue = 'rgba(' + colorValue + ',0,0,255)';
+						sliderBar.style.backgroundColor = barColorValue;
+						settingDisplay.style.backgroundColor = newColorValue;
+						ccSettingsCurrent.sliderPositions[colorProp].red = sliderValue;
+						ccSettingsCurrent.sliderColors[colorProp].red = colorValue;
+						ccSettingsCurrent[colorProp] = newColorValue;
+						ccSettingsCurrent.ccSettingsChanged[colorProp] = true;
+					}
+					if(colorId.split('_')[3] === 'green') {
+						var newColorValue = 'rgba(' + red + ',' + colorValue + ',' + blue +',' + ccSettingsCurrent.s_bgalpha +')';
+						var barColorValue = 'rgba(0,' + colorValue + ',0,255)';
+						sliderBar.style.backgroundColor = barColorValue;
+						settingDisplay.style.backgroundColor = newColorValue;
+						ccSettingsCurrent.sliderPositions[colorProp].green = sliderValue;
+						ccSettingsCurrent.sliderColors[colorProp].green = colorValue;
+						ccSettingsCurrent[colorProp] = newColorValue;
+						ccSettingsCurrent.ccSettingsChanged[colorProp] = true;
+					}
+					if(colorId.split('_')[3] === 'blue') {
+						var newColorValue = 'rgba(' + red + ',' + green + ',' + colorValue +',' + ccSettingsCurrent.s_bgalpha +')';
+						var barColorValue = 'rgba(0,0,' + colorValue + ',255)';
+						sliderBar.style.backgroundColor = barColorValue;
+						settingDisplay.style.backgroundColor = newColorValue;
+						ccSettingsCurrent.sliderPositions[colorProp].blue = sliderValue;
+						ccSettingsCurrent.sliderColors[colorProp].blue = colorValue;
+						ccSettingsCurrent[colorProp] = newColorValue;
+						ccSettingsCurrent.ccSettingsChanged[colorProp] = true;
+					}
+				}
+				parentWindow.pushUpdate();
+			}
+		}
+
+		function clearAll() {
+			mouseDown = null;
+			parentWindow = null;
+			ccSettingsDefaults = null;
+			ccSettingsCurrent = null;
+			captionsView = null;
+			currentSettings = null;
+			currentOpenSetting = null;
+		}
+
+		function mShutdown(evt) {
+			parentWindow.debuglog('closing_view started on choice');
+			clearAll();
+			parentWindow.debuglog("closing_view finished on choice");
+		}
+
+		
+
+		window.addEventListener('load', function(){
+			parentWindow = vod.getView().getOpener().getWindow();
+			captionsView = parentWindow.captionsView;
+			ccSettingsDefaults = parentWindow.ccSettingsDefaults;
+			ccSettingsCurrent = parentWindow.ccSettingsCurrent;
+			setCCDefaults();
+			var langChoicesEle = document.getElementById('lang_choices');
+			langChoicesEle.style.display = 'block';
+			var captionSettingsEle = document.getElementById('caption_settings');
+			captionSettingsEle.style.display = 'none';
+			
+			document.getElementById('settings_button').addEventListener('click',function(){
+				if(langChoicesEle.style.display ==='block') {
+					langChoicesEle.style.display ='none';
+					document.getElementById('settings_button_button').innerHTML = 'Language';
+				}
+				else {
+					langChoicesEle.style.display = 'block';
+				}
+				if(captionSettingsEle.style.display ==='block') {
+					captionSettingsEle.style.display ='none';
+					document.getElementById('settings_button_button').innerHTML = 'Settings';
+				}
+				else {
+					captionSettingsEle.style.display = 'block';
+				}
+			});
+			
+			/* Hides all setting containers */
+			var settingsContainers = document.getElementById('caption_settings').getElementsByClassName('buttonWrapper');
+			for(var i = 0; i<= settingsContainers.length - 1; i++){
+				var settingContainer = settingsContainers[i];
+				var settingButton = settingContainer.getElementsByTagName('button')[0];
+				var settingChoicesContainer = document.getElementById(settingContainer.id + '_container');
+				settingChoicesContainer.style.display = 'none';
+			}
+
+			document.getElementById('caption_settings').addEventListener('click',function(evt) {
+				var srcId = evt.srcElement.id;
+				if(evt.srcElement.id.search('Button') !== -1) {
+					handleSettingClick(evt);
+				}
+				if(evt.srcElement.id.search('_choice_') !== -1) {
+					handleChoiceClick(evt);
+				}
+			});
+			var baseColors = ['red','green','blue'];
+			var colorSettings = ['bg','fg','win'];
+			for(var k = 0; k <= colorSettings.length - 1; k++) {
+				for(var i = 0; i <= baseColors.length - 1; i++) {
+					var elementString = 's_' + colorSettings[k] + 'color_slider_' + baseColors[i];
+					document.getElementById(elementString + '_scrubber_img').src = parentWindow.nascrubberImage_base64;
+					document.getElementById(elementString + '_scrubber_overlay').addEventListener('mousemove',handleColorMouseMove);
+					document.getElementById(elementString + '_scrubber_overlay').addEventListener('mousedown',handleColorMouseDown);
+					document.getElementById(elementString + '_scrubber_overlay').addEventListener('mouseup',handleColorMouseUp);
+				}
+			}
+			vod.addEventListener('closing_view',mShutdown);
+			vod.ready();
+			parentWindow.setupCaptions(false);
+			parentWindow.pushUpdate();
+			var thisView = vod.getView();
+			var Move = true;	
+			vod.addEventListener('pageMovePositionY_reached',function(evt){
+				if(!Move) {
+					thisView.hide();
+					Move = true;
+				} else Move = false;
+			});
+			vod.ready();
+		});
+	</script>
+	</head>
+	<body style="margin: 0px;">
+		<div id="cc_choice">
+			<div id="settings_button" class="buttonWrapper"><button id="settings_button_button" class="settingsButton myButton">Settings</button></div>
+			<div id="lang_choices" style="margin: 0px;"></div>
+			<div id="caption_settings">
+				<div id="s_save_reset" class="save_reset">
+					<button id="s_saveButton" class="myButton save_resetButton">Save</button>
+					<button id="s_resetButton" class="myButton save_resetButton">Reset</button>
+				</div>
+				<div id="s_bgcolor" class="buttonWrapper">
+					<button id="s_bgcolorButton" class="myButton sButton">Background Color
+						<div id="s_bgcolor_scr" class="settingColorRep"></div>
+					</button>
+					<div id="s_bgcolor_container" class="settingsContainer">
+						<div id="s_bgcolor_red_slider" class="slider">
+							<div id="s_bgcolor_slider_red_bar" class="sliderbar"></div>
+							<div id="s_bgcolor_slider_red_scrubber_overlay" class="slider_scrubber_overlay sliderbar"></div>
+							<img id="s_bgcolor_slider_red_scrubber_img" class="slider_scrubber_img"/>
+						</div>
+						<div id="s_bgcolor_green_slider" class="slider">
+							<div id="s_bgcolor_slider_green_bar" class="sliderbar"></div>
+							<div id="s_bgcolor_slider_green_scrubber_overlay" class="slider_scrubber_overlay sliderbar"></div>
+							<img id="s_bgcolor_slider_green_scrubber_img" class="slider_scrubber_img"/>
+						</div>
+						<div id="s_bgcolor_blue_slider" class="slider">
+							<div id="s_bgcolor_slider_blue_bar" class="sliderbar"></div>
+							<div id="s_bgcolor_slider_blue_scrubber_overlay" class="slider_scrubber_overlay sliderbar"></div>
+							<img id="s_bgcolor_slider_blue_scrubber_img" class="slider_scrubber_img"/>
+						</div>
+					</div>
+				</div>
+				<div id="s_fgcolor" class="buttonWrapper">
+					<button id="s_fgcolorButton" class="myButton sButton">Foreground Color
+						<div id="s_fgcolor_scr" class="settingColorRep"></div>
+					</button>
+					<div id="s_fgcolor_container" class="settingsContainer">
+						<div id="s_fgcolor_red_slider" class="slider">
+							<div id="s_fgcolor_slider_red_bar" class="sliderbar"></div>
+							<div id="s_fgcolor_slider_red_scrubber_overlay" class="slider_scrubber_overlay sliderbar"></div>
+							<img id="s_fgcolor_slider_red_scrubber_img" class="slider_scrubber_img"/>
+						</div>
+						<div id="s_fgcolor_green_slider" class="slider">
+							<div id="s_fgcolor_slider_green_bar" class="sliderbar"></div>
+							<div id="s_fgcolor_slider_green_scrubber_overlay" class="slider_scrubber_overlay sliderbar"></div>
+							<img id="s_fgcolor_slider_green_scrubber_img" class="slider_scrubber_img"/>
+						</div>
+						<div id="s_fgcolor_blue_slider" class="slider">
+							<div id="s_fgcolor_slider_blue_bar" class="sliderbar"></div>
+							<div id="s_fgcolor_slider_blue_scrubber_overlay" class="slider_scrubber_overlay sliderbar"></div>
+							<img id="s_fgcolor_slider_blue_scrubber_img" class="slider_scrubber_img"/>
+						</div>
+					</div>
+				</div>
+				<div id="s_wincolor" class="buttonWrapper">
+					<button id="s_wincolorButton" class="myButton sButton">Window Color
+						<div id="s_wincolor_scr" class="settingColorRep"></div>
+					</button>
+					<div id="s_wincolor_container" class="settingsContainer">
+						<div id="s_wincolor_red_slider" class="slider">
+							<div id="s_wincolor_slider_red_bar" class="sliderbar"></div>
+							<div id="s_wincolor_slider_red_scrubber_overlay" class="slider_scrubber_overlay sliderbar"></div>
+							<img id="s_wincolor_slider_red_scrubber_img" class="slider_scrubber_img"/>
+						</div>
+						<div id="s_wincolor_green_slider" class="slider">
+							<div id="s_wincolor_slider_green_bar" class="sliderbar"></div>
+							<div id="s_wincolor_slider_green_scrubber_overlay" class="slider_scrubber_overlay sliderbar"></div>
+							<img id="s_wincolor_slider_green_scrubber_img" class="slider_scrubber_img"/>
+						</div>
+						<div id="s_wincolor_blue_slider" class="slider">
+							<div id="s_wincolor_slider_blue_bar" class="sliderbar"></div>
+							<div id="s_wincolor_slider_blue_scrubber_overlay" class="slider_scrubber_overlay sliderbar"></div>
+							<img id="s_wincolor_slider_blue_scrubber_img" class="slider_scrubber_img"/>
+						</div>
+					</div>
+				</div>
+				<div id="s_bgtrans" class="buttonWrapper">
+					<button id="s_bgtransButton" class="myButton sButton">Background Tansparency
+					</button>
+					<div id="s_bgtrans_container" class="settingsContainer">
+						<ul>
+							<li class="verticalUL">
+								<div id="s_bgtrans_choice_tr" class="settingColorRep float_left circleChoice white">
+									<div id="s_bgtrans_tr_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Transparent</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_bgtrans_choice_st" class="settingColorRep float_left circleChoice white">
+									<div id="s_bgtrans_st_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Semi-Transparent</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_bgtrans_choice_op" class="settingColorRep float_left circleChoice white">
+									<div id="s_bgtrans_op_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Opaque</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div id="s_texttrans" class="buttonWrapper">
+					<button id="s_texttransButton" class="myButton sButton">Text Transparency
+					</button>
+					<div id="s_texttrans_container" class="settingsContainer">
+						<ul>
+							<li class="verticalUL">
+								<div id="s_texttrans_choice_tr" class="settingColorRep float_left circleChoice white">
+									<div id="s_texttrans_tr_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Transparent</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_texttrans_choice_st" class="settingColorRep float_left circleChoice white">
+									<div id="s_texttrans_st_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Semi-Transparent</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_texttrans_choice_op" class="settingColorRep float_left circleChoice white">
+									<div id="s_texttrans_op_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Opaque</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div id="s_wintrans" class="buttonWrapper">
+					<button id="s_wintransButton" class="myButton sButton">Window Transparency
+					</button>
+					<div id="s_wintrans_container" class="settingsContainer">
+						<ul>
+							<li class="verticalUL">
+								<div id="s_wintrans_choice_tr" class="settingColorRep float_left circleChoice white">
+									<div id="s_wintrans_tr_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Transparent</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_wintrans_choice_st" class="settingColorRep float_left circleChoice white">
+									<div id="s_wintrans_st_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Semi-Transparent</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_wintrans_choice_op" class="settingColorRep float_left circleChoice white">
+									<div id="s_wintrans_op_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Opaque</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<div id="s_textsize" class="buttonWrapper">
+					<button id="s_textsizeButton" class="myButton sButton">Text Size
+						<div id="s_textsize_src" class="settingRep">12</div>
+					</button>
+					<div id="s_textsize_container" class="settingsContainer">
+						<ul>
+							<li id="s_textsize_choice_up" class="settingColorRep individualColorSetting white">+</li>
+							<li id="s_textsize_choice_down" class="settingColorRep individualColorSetting white">-</li>
+						</ul>
+					</div>
+				</div>
+				<div id="s_charedgestyle" class="buttonWrapper">
+					<button id="s_charedgestyleButton" class="myButton sButton">Character Edge Style
+					</button>
+					<div id="s_charedgestyle_container" class="settingsContainer">
+						<ul>
+							<li class="verticalUL">
+								<div id="s_charedgestyle_choice_uni" class="settingColorRep float_left circleChoice white">
+									<div id="s_charedgestyle_uni_circle_inner"class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Uniform</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_charedgestyle_choice_ds" class="settingColorRep float_left circleChoice white">
+									<div id="s_charedgestyle_ds_circle_inner"class="settingColorRep circleChoiceInner"></div></div>
+								<div class="settingsChoice">Drop Shadow</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_charedgestyle_choice_rd" class="settingColorRep float_left circleChoice white">
+									<div id="s_charedgestyle_rd_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Raised</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_charedgestyle_choice_dep" class="settingColorRep float_left circleChoice white">
+									<div id="s_charedgestyle_dep_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Depressed</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_charedgestyle_choice_none" class="settingColorRep float_left circleChoice white">
+									<div id="s_charedgestyle_none_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">None</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+				<!--div id="s_fontfam" class="buttonWrapper">
+					<button id="s_fontfamButton" class="myButton sButton">Font Family
+					</button>
+					<div id="s_fontfam_container" class="settingsContainer">
+						<ul>
+							<li class="verticalUL">
+								<div id="s_fontfam_choice_ms" class="settingColorRep float_left circleChoice white">
+									<div id="s_fontfam_ms_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Monospaced Serif</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_fontfam_choice_ps" class="settingColorRep float_left circleChoice white">
+									<div id="s_fontfam_ps_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Proportional Serif</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_fontfam_choice_mss" class="settingColorRep float_left circleChoice white">
+									<div id="s_fontfam_mss_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Monospaced Sans-Serif</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_fontfam_choice_pss" class="settingColorRep float_left circleChoice white">
+									<div id="s_fontfam_pss_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Proportional Sans-Serif</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_fontfam_choice_ca" class="settingColorRep float_left circleChoice white">
+									<div id="s_fontfam_ca_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Casual</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_fontfam_choice_cu" class="settingColorRep float_left circleChoice white">
+									<div id="s_fontfam_cu_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Cursive</div>
+							</li>
+							<li class="verticalUL">
+								<div id="s_fontfam_choice_sc" class="settingColorRep float_left circleChoice white">
+									<div id="s_fontfam_sc_circle_inner" class="settingColorRep circleChoiceInner"></div>
+								</div>
+								<div class="settingsChoice">Small Capitals</div>
+							</li>
+						</ul>
+					</div>
+				</div-->
+
+			</div>
+		</div>
+	</body>
+</html>

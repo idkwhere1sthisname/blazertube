@@ -79,7 +79,7 @@ sortedcontainers==2.4.0
 soupsieve==2.9.2
 tornado==6.5.8
 typing_extensions==4.16.0
-urllib3==2.7.0
+urllib3==2.8.0
 urwid==4.0.13
 waitress==3.0.2
 wcwidth==0.8.2
