@@ -20,7 +20,11 @@ Found in `shared.py` as booleans
 ENABLE_CREDS_OVERRIDE: Literal[True, False] = False
 ```
 
-Enables the use of custom credentials instead of using the default InnerTube ones. Useful if you want to use a Google Cloud application instead of the YouTube on TV one
+Enables the use of custom credentials instead of using the default InnerTube ones. Useful if you want to use a custom OAuth2 application instead. Requires valid credentials to be placed in `.env`:
+
+- `OVERRIDE_CLIENT_ID`: The client ID of the Google Cloud application
+- `OVERRIDE_CLIENT_SECRET`: The client secret of the Google Cloud application
+- `OVERRIDE_LOGIN_SCOPES`: The login scopes of the Google Cloud app (recommended is `https://www.googleapis.com/auth/youtube.force-ssl` or `https://www.googleapis.com/auth/youtube`, but if the app is not verified by Google, this will trigger an "Unverified developer" screen). Must match the actual app's login scopes
 
 ```py
 SIGNINDISABLED: Literal[True, False] = False
