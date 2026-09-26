@@ -6,6 +6,7 @@
 | [Server docs](DOCS.md#server-docs)                  |
 | [YouTube 3DS docs](DOCS.md#youtube-3ds-docs)        |
 | [Hulu Plus 3DS docs (todo)](DOCS.md#hulu-plus-docs) |
+| [Netflix 3DS docs (todo)](DOCS.md#netflix-docs)     |
 
 ## Server docs
 
@@ -17,35 +18,35 @@
 Found in `shared.py` as booleans
 
 ```py
-ENABLE_CREDS_OVERRIDE: Literal[True, False] = False
+ENABLE_CREDS_OVERRIDE: Literal[True, False] | bool = False
 ```
 
 Enables the use of custom credentials instead of using the default InnerTube ones. Useful if you want to use a custom OAuth2 application instead. Requires valid credentials to be placed in `.env`:
 
 - `OVERRIDE_CLIENT_ID`: The client ID of the Google Cloud application
 - `OVERRIDE_CLIENT_SECRET`: The client secret of the Google Cloud application
-- `OVERRIDE_LOGIN_SCOPES`: The login scopes of the Google Cloud app (recommended are `openid`, `email`, `name`, and `https://www.googleapis.com/auth/youtube.force-ssl` (or `https://www.googleapis.com/auth/youtube`), but if the app is not verified by Google, this will trigger an "Unverified developer" screen). Must match the actual app's login scopes
+- `OVERRIDE_LOGIN_SCOPES`: The login scopes of the Google Cloud app (recommended are `openid`, `email`, `name`, and `https://www.googleapis.com/auth/youtube.force-ssl` (or `https://www.googleapis.com/auth/youtube`), but if the app is not verified by Google, this will trigger an "Unverified application" screen). Must match the actual app's login scopes
 
 ```py
-SIGNINDISABLED: Literal[True, False] = False
+SIGNINDISABLED: Literal[True, False] | bool = False
 ```
 
 Disables the sign in feature
 
 ```py
-SIGNINDISABLED_REASON: LiteralString = "Sign-Ins are disabled by an administrator."
+SIGNINDISABLED_REASON: LiteralString | str = "Sign-Ins are disabled by an administrator."
 ```
 
 Shown in the sign in disabled page, and only applies when sign ins are disabled
 
 ```py
-ENABLE_CLEAR_MEMORY_BTN: Literal[True, False] = False
+ENABLE_CLEAR_MEMORY_BTN: Literal[True, False] | bool = False
 ```
 
 Enables a "Clear Memory" button shown when the user is signed out, it deletes every cookie from the browser (3DS only)
 
 ```py
-ENABLE_DUMMY_SIGNIN: Literal[True, False] = False
+ENABLE_DUMMY_SIGNIN: Literal[True, False] | bool = False
 ```
 
 Uses fake credentials and does NOT contact YouTube for the OAuth2 activation code. This option was used to design the sign in page
@@ -154,7 +155,7 @@ The app also has some built in pages (e.g. the white page with the loading scree
 
 `Mozilla/5.0 (Nintendo 3DS; U; Factory Media Production; en) Version/1.7498.US`
 
-User-Agent request header for Old 3DS systems, it is almost identical to the Wii's apps. The region is always US, no matter the actual console's region
+User-Agent request header for Old 3DS systems, it is almost identical to the Wii's apps. The region is always `US`, and the language is always `en` no matter the actual console's region/language
 
 `Mozilla/5.0 (Nintendo 3DS New3DS; U; Factory Media Production; en) Version/1.7499.US`
 
