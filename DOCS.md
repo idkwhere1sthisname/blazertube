@@ -24,7 +24,7 @@ Enables the use of custom credentials instead of using the default InnerTube one
 
 - `OVERRIDE_CLIENT_ID`: The client ID of the Google Cloud application
 - `OVERRIDE_CLIENT_SECRET`: The client secret of the Google Cloud application
-- `OVERRIDE_LOGIN_SCOPES`: The login scopes of the Google Cloud app (recommended is `https://www.googleapis.com/auth/youtube.force-ssl` or `https://www.googleapis.com/auth/youtube`, but if the app is not verified by Google, this will trigger an "Unverified developer" screen). Must match the actual app's login scopes
+- `OVERRIDE_LOGIN_SCOPES`: The login scopes of the Google Cloud app (recommended are `openid`, `email`, `name`, and `https://www.googleapis.com/auth/youtube.force-ssl` (or `https://www.googleapis.com/auth/youtube`), but if the app is not verified by Google, this will trigger an "Unverified developer" screen). Must match the actual app's login scopes
 
 ```py
 SIGNINDISABLED: Literal[True, False] = False
