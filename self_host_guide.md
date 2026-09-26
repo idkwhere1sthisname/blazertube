@@ -40,7 +40,7 @@ FLASK_SECRET_KEY=[...]
 > [!NOTE]
 > This guide applies if you're using [Pretendo Network](https://pretendo.network), if you don't plan on using Pretendo, please scroll down!
 
-1. Obtain the latest YouTube app (must match your console's region)
+1. Obtain the latest version of the 3DS YouTube app (must match your console's region)
     - It is available on a certain _green eShop_ website
     - `v2096` is the latest version for the American and Japanese app, while `v2080` is the latest for the European one
 2. Run `/patcher/patcher.py` to create a patched binary or IPS for 3DS consoles.
@@ -52,7 +52,7 @@ FLASK_SECRET_KEY=[...]
 > [!IMPORTANT]
 > This guide applies only if you're not going to use Pretendo, which isn't recommended! It's more steps for something that is unnecessary.
 
-1. Obtain the latest YouTube app (must match your console's region)
+1. Obtain the latest version of the 3DS YouTube app (must match your console's region)
     - It is available on a certain _green eShop_ website
     - `v2096` is the latest version for the American and Japanese app, while `v2080` is the latest for the European one
 2. Run `/patcher/patcher.py` to create a patched binary or IPS for 3DS consoles.
@@ -83,7 +83,7 @@ FLASK_SECRET_KEY=[...]
 > [!IMPORTANT]
 > The Hulu Plus app doesn't have any functionality.
 
-1. Obtain the latest Hulu Plus app (must match your console's region)
+1. Obtain the latest version of the Hulu Plus app (must match your console's region)
     - It is available on a certain _green eShop_ website
     - If you're on an European console, you can get either the American or Japanese app, just remember to place the `locale.txt` file if you aren't installing from that _green eShop_ site
     - `v0` is the latest version for the American app, while `v32` is the latest for the Japanese one
@@ -103,7 +103,7 @@ FLASK_SECRET_KEY=[...]
 > [!IMPORTANT]
 > The Netflix app doesn't have any functionality besides showing the login screen and the [hidden Konami code screen](https://youtu.be/1ePh39fYAG8).
 
-1. Obtain the latest Netflix app
+1. Obtain the latest version of the Netflix app
     - It is available on a certain _green eShop_ website
     - `v1088` is the latest version for the app
     - If you're on an European or Japanese console, you can get the app anyway, just remember to place the `locale.txt` file in the SD if you aren't installing from that _green eShop_ site
