@@ -55,16 +55,6 @@ The 3DS YouTube app (similar to the Wii VOD apps such as Crunchyroll or Amazon I
 
 Most of the functions don't do anything (presumably because the class has been ported 1:1 from the Wii apps), but a few actually do something:
 
-### User agent strings
-
-`Mozilla/5.0 (Nintendo 3DS; U; Factory Media Production; en) Version/1.7498.US`
-
-User-Agent request header for Old 3DS systems, it is almost identical to the Wii's apps. The region is always US, no matter the actual console's region
-
-`Mozilla/5.0 (Nintendo 3DS New3DS; U; Factory Media Production; en) Version/1.7499.US`
-
-User-Agent request header for New 3DS systems, it is only shown if the console is American and is an actual New 3DS. Otherwise the Old 3DS User-Agent is used. The browser's version is more updated, even though it's unclear what changed
-
 ### Built-in functions
 
 > [!NOTE]
@@ -155,3 +145,13 @@ The app also has some built in pages (e.g. the white page with the loading scree
 
 > [!NOTE]  
 > On previous VOD apps, you were able to delete your cookies by visiting `http://embedded.wii/?clear_local_data=1`, this is why the `ENABLE_CLEAR_MEMORY_BTN` [advanced option](#advanced-configuration) was implemented in the first place.
+
+### User agent strings
+
+`Mozilla/5.0 (Nintendo 3DS; U; Factory Media Production; en) Version/1.7498.US`
+
+User-Agent request header for Old 3DS systems, it is almost identical to the Wii's apps. The region is always US, no matter the actual console's region
+
+`Mozilla/5.0 (Nintendo 3DS New3DS; U; Factory Media Production; en) Version/1.7499.US`
+
+User-Agent request header for New 3DS systems, it is only shown if the console is American and is an actual New 3DS. Otherwise the Old 3DS User-Agent is used. The browser's version is more updated, even though it's unclear what changed
