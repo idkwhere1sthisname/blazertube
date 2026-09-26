@@ -4,9 +4,12 @@ from __future__ import print_function
 from dnslib import DNSRecord, QTYPE, RR, A
 import socket
 import sys
+import colorama
 
 s = socket.gethostname()
 addr = socket.gethostbyname(s)
+colorama.init(autoreset=True)
+Fore = colorama.Fore
 
 IPADDR = addr
 ADDRPORT = 53
@@ -14,7 +17,7 @@ ADDRPORT = 53
 RMAP = {
     "m.youtube.com.": addr,
 }
-UDNS = "8.8.8.8"
+DEFAULTDNS = "8.8.8.8"
 
 def dns_handler(data):
     request = DNSRecord.parse(data)
@@ -24,11 +27,11 @@ def dns_handler(data):
     reply = request.reply()
 
     if qname in RMAP and qtype == "A": # a dns
-        print(f"[r,a]{qname}->{RMAP[qname]}")
+        print("%s[info]%s redirecting %s to %s"%(Fore.GREEN,Fore.RESET,qname,RMAP[qname]))
         reply.add_answer(RR(qname, QTYPE.A, rdata=A(RMAP[qname])))
     else:
-        print(f"[r] {qname}->{UDNS}")
-        proxy = request.send(UDNS, 53, timeout=2.0)
+        print("%s[info]%s looking up %s on default DNS (%s)"%(Fore.BLUE,Fore.RESET,qname,DEFAULTDNS))
+        proxy = request.send(DEFAULTDNS, 53, timeout=2.0)
         return proxy
 
     return reply.pack()
@@ -49,13 +52,23 @@ if choice == "n":
     sys.exit(0)
 else: pass
 
-print("[i] dns server running")
-print(f"[i] primary DNS: {addr}")
-print(f"[i] secondary DNS: {UDNS}")
-while True:
-    try:
-        data, addr = sock.recvfrom(512)
-        resp = dns_handler(data)
-        sock.sendto(resp, addr)
-    except KeyboardInterrupt:
-        sys.exit(0)
+print("%s[info]%s dns server running"%(Fore.BLUE,Fore.RESET))
+print("%s[info]%s set these values in the 3DS' DNS settings"%(Fore.BLUE,Fore.RESET))
+print("%s[info]%s primary DNS: %s"%(Fore.BLUE,Fore.RESET,addr))
+print("%s[info]%s secondary DNS: %s"%(Fore.BLUE,Fore.RESET,DEFAULTDNS))
+
+sock.settimeout(1.00)
+
+try:
+    while True:
+        try:
+            data, addr = sock.recvfrom(512)
+            resp = dns_handler(data)
+            sock.sendto(resp, addr)
+        except socket.timeout:
+            continue
+        except ConnectionResetError:
+            continue
+except KeyboardInterrupt:
+    print("Exiting...")
+    sys.exit(0)

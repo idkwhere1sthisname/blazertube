@@ -617,12 +617,13 @@ def debug():
 @app.route("/my_account")
 @app.route("/my_history")
 @app.route("/my_subscriptions")
-@app.route("/feed/<path:subpath>/<path:subsubpath>",strict_slashes=False)
+@app.route("/feed/<path:subpath>/<path:activitypath>",strict_slashes=False)
 @app.route("/recommended")
 @app.route("/my_videos")
+@app.route("/popular")
 @checkifajax
 # todo: playlists
-def feed(subpath=None,subsubpath=None):
+def feed(subpath=None,activitypath=None):
     cookies = request.cookies
     hl = cookies.get("hl") or getattr(g,"HL","en")
     gl = cookies.get("gl") or getattr(g,"GL","US")
@@ -638,7 +639,38 @@ def feed(subpath=None,subsubpath=None):
             "destination_moments": None,
         },
     }
-    if subpath is None or subpath == "popular":
+    if subpath is None or request.path == "/home":
+        if not g.SIGNED_IN:
+            raw = fetch_popular(maxResults=10)
+            json_r = {
+                "content": {
+                    "feed_items": [flat_item(v["video"]) for v in raw],
+                    "feed_title": "Popular on YouTube",
+                    "featured_shelves": build_shelves(raw),
+                    "channel_url": None,
+                    "image_url": None,
+                    "show_filter": False,
+                    "show_social_upsell": False,
+                    "destination_moments": None,
+                }
+            }
+        else:
+            oauth_token = g.OAUTH_TOKEN
+            raw,shelves = innertube.WhatToWatch(oauth_token=oauth_token,hl=hl,gl=gl)
+            json_r = {
+                "content": {
+                    "feed_items": [flat_item(w) for w in raw[:20]],
+                    "feed_title": "What to Watch",
+                    "featured_shelves": shelves,
+                    "channel_url": None,
+                    "image_url": None,
+                    "show_filter": False,
+                    "next_url": None,
+                    "show_social_upsell": False,
+                    "destination_moments": None,
+                }
+            }
+    elif subpath == "popular" or request.path == "/popular":
         raw = fetch_popular(maxResults=10)
         json_r = {
             "content": {
@@ -657,7 +689,7 @@ def feed(subpath=None,subsubpath=None):
             return redirect("/vendor_signin/required?from=subscriptions")
         feed_items_activity = None
         oauth_token = g.OAUTH_TOKEN
-        if subsubpath == "activity":
+        if activitypath == "activity":
             json_r = {
                 "content": {
                     "feed_items": feed_items_activity,
@@ -667,7 +699,6 @@ def feed(subpath=None,subsubpath=None):
                     "image_url": None,
                     "next_url": None,
                     "show_social_upsell": False,
-                    # first check should be enough to show the filter or not
                     "show_filter": True,
                     "destination_moments": None,
                 }
@@ -687,7 +718,7 @@ def feed(subpath=None,subsubpath=None):
                     "destination_moments": None,
                 }
             }
-    elif subpath == "river":
+    elif subpath == "river" or request.path == "/recommended":
         if not g.SIGNED_IN:
             return redirect("/vendor_signin/required?from=river")
         oauth_token = g.OAUTH_TOKEN
@@ -788,7 +819,7 @@ def guide_ajax():
         "content": {
             "innertube_guide": [
                 {"title": "", "items": [
-                    make_guide_item("Popular on YouTube", "/home", "/static/images/topics/icons/thumb_popular.jpg"),
+                    make_guide_item("Popular on YouTube", "/popular", "/static/images/topics/icons/thumb_popular.jpg"),
                     make_guide_item("Music", "/topic/UC-9-kyTW8ZkZNDHQJ6FgpwQ", "/static/images/topics/icons/thumb_music.jpg"),
                     make_guide_item("Sports", "/topic/UCEgdi0XIXXZ-qJOFPf4JSKw", "/static/images/topics/icons/thumb_sports.jpg"),
                     make_guide_item("Gaming", "/topic/UCOpNcN46UbXVtpKMrmU4Abg", "/static/images/topics/icons/thumb_gaming.jpg"),
@@ -1187,6 +1218,7 @@ def videoplayback():
 @app.route("/topic/<string:userId>/icon")
 def pfpproxy(userId):
     SIDEBAR_THUMB = {
+        "UCF0pVplsI8R5kcAqgtoRqoA":"thumb_popular.jpg",
         "UClgRkhTL3_hImCAmdLfDE4g":"thumb_movies_new.jpg",
         "UCYfdidRxbB8Qhf0Nx7ioOYw":"thumb_news.jpg",
         "UCOpNcN46UbXVtpKMrmU4Abg":"thumb_gaming.jpg",
@@ -3360,10 +3392,6 @@ if __name__ == "__main__":
     if (not GDATA_API_KEY) or (not GDATA_API_KEY.strip()):
         print("Cannot continue without a YouTube Data API key. Please place one in .env")
         sys.exit(-1)
-    if (not LOGIN_SCOPE) or (not OAUTH_ID) or (not OAUTH_SECRET):
-        print("One or more required environment variables are missing.")
-        print("Please check your environment (.env) file and try again.")
-        sys.exit(-1)
     if not ENABLE_CREDS_OVERRIDE:
         if (not DEFAULT_DEVICE_ID) or (not DEFAULT_DEVICE_MODEL):
             print("DEFAULT_DEVICE_ID and DEFAULT_DEVICE_MODEL are required when using InnerTube's login system.")
@@ -3386,12 +3414,14 @@ if __name__ == "__main__":
         })
     if not debugmode:
         funcmod.clearscreen()
+    tmpvideo = GetVideo()
+    tmpvideo.createviddir()
+    if not ENABLE_CREDS_OVERRIDE:
+        initial,httpcd = innertube.GetInitialTVHTML(None)
+        innertube.RefreshAllCredentials(initial,httpcd)
     print(f"{Fore.MAGENTA}[cleanup]{Fore.RESET} Starting video cleanup thread")
     thread = threading.Thread(target=cleanup_schedule,daemon=True,name="btvidcleanupd")
     thread.start()
-    lbl351_captions = Captions()
-    tmpvideo = GetVideo()
-    tmpvideo.createviddir()
     if not debugmode:
         set_external_API_url("https","lbl-api.idkwh.ct8.pl","443")
         set_versioned_xlb_subpath("api/ctr/GetVersionedXLB.php")
@@ -3402,6 +3432,4 @@ if __name__ == "__main__":
     elif not cookiesvalid:
         print(f"{Fore.YELLOW}[warn]{Fore.RESET} Cookie file is invalid")
         print(f"{Fore.BLUE}[info]{Fore.RESET} For more info on how to re-export cookies, refer to this guide: https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp")
-    if not ENABLE_CREDS_OVERRIDE:
-        funcmod.update_innertube_key(INNERTUBE_KEY)
     app.run(host=host,port=port,debug=debugmode,threaded=True,ssl_context=context,extra_files=["config.xml",".env"])

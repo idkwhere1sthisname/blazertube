@@ -21,11 +21,11 @@ Found in `shared.py` as booleans
 ENABLE_CREDS_OVERRIDE: Literal[True, False] | bool = False
 ```
 
-Enables the use of custom credentials instead of using the default InnerTube ones. Useful if you want to use a custom OAuth2 application instead. Requires valid credentials to be placed in `.env`:
+Enables the use of custom credentials instead of using the default InnerTube ones. Useful if you want to use a custom OAuth2 application. Requires valid credentials to be placed in `.env`:
 
 - `OVERRIDE_CLIENT_ID`: The client ID of the Google Cloud application
 - `OVERRIDE_CLIENT_SECRET`: The client secret of the Google Cloud application
-- `OVERRIDE_LOGIN_SCOPES`: The login scopes of the Google Cloud app (recommended are `openid`, `email`, `name`, and `https://www.googleapis.com/auth/youtube.force-ssl` (or `https://www.googleapis.com/auth/youtube`), but if the app is not verified by Google, this will trigger an "Unverified application" screen). Must match the actual app's login scopes
+- `OVERRIDE_LOGIN_SCOPES`: The login scopes of the Google Cloud app (recommended are `openid`, `email`, `profile`, and `https://www.googleapis.com/auth/youtube`, but if the app is not verified by Google, this will trigger an "Unverified application" screen). Must match the actual app's login scopes
 
 ```py
 SIGNINDISABLED: Literal[True, False] | bool = False
@@ -54,7 +54,7 @@ Uses fake credentials and does NOT contact YouTube for the OAuth2 activation cod
 ## YouTube 3DS docs
 
 > [!NOTE]
-> Also check out this [3DBrew](https://3dbrew.org/wiki/YouTube) page! it has info about how the DNS redirection works on Revision 1 of the app, but not on the newer versions, and more.
+> Also check out this [3DBrew](https://3dbrew.org/wiki/YouTube) page! it has more technical info about the app.
 
 The 3DS YouTube app (similar to the Wii VOD apps such as Crunchyroll or Amazon Instant Video) uses a downgraded WebKit port by [FactorY Media Production GmbH](https://www.northdata.de/FactorY%20Media%20Production%20GmbH,%20K%C3%B6ln/HRB%2070454) ([source](https://github.com/search?q=repo%3Ayoutube%2Fh5vcc_hh+FactorY+Media+Production&type=code)). Again, similar to the Wii VOD apps, it has a Netscape Plugin embedded in the app.
 
@@ -139,16 +139,16 @@ The app also has some built in pages (e.g. the white page with the loading scree
 
 | Page              | Description                                                                                                                                         |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| launcher.html     | App launcher, it's the only ZLIB compressed HTML in the binary, it is responsible for opening the app URL and setting the time from the server      |
+| launcher.html     | App launcher, it's the only ZLIB compressed HTML in the binary. It is responsible for opening the app URL and setting the time from the server      |
 | miiverse.html     | Blank page, but has a Miiverse icon on top (X = Miiverse?), it was never used in the app, but it was probably a planned feature                     |
 | playbackctrl.html | Houses the little seek bar, play and subtitles icon when you play a video on the app, if you access it directly, it will be broken                  |
 | choice.html       | Contains and saves the subtitles options when you play a video, it will be broken if accessed directly                                              |
-| error.html        | Blank page                                                                                                                                          |
 | error-min.html    | Blank page, even though it might be able to show something (`http://embedded.ctr/error-min.html?error=%s&arg=%d`, `Ui::DoDisplayError(): %s, %d`)   |
 | pdchoice.html     | Blank page and untested, may be trying to contact a defunct server (`http://172.18.1.30/youtube/videoControls/choice.html`)                         |
 | loading.html      | Blank page                                                                                                                                          |
+| error.html        | Blank page                                                                                                                                          |
 
-> [!NOTE]  
+> [!NOTE]
 > On previous VOD apps, you were able to delete your cookies by visiting `http://embedded.wii/?clear_local_data=1`, this is why the `ENABLE_CLEAR_MEMORY_BTN` [advanced option](#advanced-configuration) was implemented in the first place.
 
 ### User agent strings

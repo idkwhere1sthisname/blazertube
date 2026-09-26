@@ -8,9 +8,9 @@ import requests
 from pathlib import Path
 import warnings
 import os
-import sys
 import colorama
 from typing import Literal
+import platform
 
 from shared import *
 
@@ -96,7 +96,7 @@ def showlanip():
     return ip
 
 def clearscreen():
-    if os.name == "nt":
+    if platform.system() == "Windows":
         os.system("cls")
     else:
         os.system("clear")
@@ -196,55 +196,5 @@ def make_HTMLOnly_AJAX_response(htmlInner,timestamp,signed_in_username=None,sign
         json_r["signed_in_email"] = signed_in_email
     return json_r
 
-def disable_warnings(warn: type[Warning]):
+def disable_warnings(warn: type[Warning]) -> None:
     warnings.simplefilter("ignore",category=warn)
-
-def get_innertube_key(fallback,client:CLIENTS="TV"):
-    try:
-        if client == "TV":
-            url = "https://www.youtube.com/tv"
-            ua = TV_USERAGENT
-        elif client == "WEB":
-            url = "https://www.youtube.com/"
-            ua = API_USERAGENT
-        else:
-            url = "https://www.youtube.com/tv"
-            ua = TV_USERAGENT
-        r = requests.get(url,timeout=50,cookies=CONSENT_COOKIES,headers={
-            "User-Agent": ua,
-        })
-        httpcd = r.status_code
-        r.raise_for_status()
-        data = r.text
-    except requests.RequestException:
-        return fallback,True,httpcd
-    m = re.search(r'"INNERTUBE_API_KEY":"([^"]+)"',data)
-    upd_api_key = m.group(1) if m else None
-    if not upd_api_key:
-        return fallback,True,httpcd
-    return upd_api_key,False,httpcd
-
-def update_innertube_key(innertubeKey):
-    print(f"{Fore.BLUE}[info]{Fore.RESET} Checking if the InnerTube API key is up to date...")
-    upd_api_key,isfallback,httpcd = get_innertube_key(innertubeKey,"TV")
-    if isfallback:
-        if httpcd == 200:
-            print(f"{Fore.RED}[error]{Fore.RESET} Using fallback key, YouTube did not return a valid key")
-        else:
-            print(f"{Fore.RED}[error]{Fore.RESET} Using fallback key, couldn't contact YouTube (HTTP {httpcd})")
-    else:
-        if upd_api_key == innertubeKey:
-            print(f"{Fore.BLUE}[info]{Fore.RESET} InnerTube API key is up to date (HTTP {httpcd})")
-    if not isfallback and upd_api_key != innertubeKey:
-        print(f"{Fore.BLUE}[info]{Fore.RESET} Updating InnerTube key (old: {innertubeKey}, new: {upd_api_key})")
-        with open(".env", "r", encoding="utf-8") as f:
-            lines = f.readlines()
-        with open(".env", "w", encoding="utf-8") as f:
-            for line in lines:
-                if line.startswith("INNERTUBE_KEY="):
-                    f.write(f"INNERTUBE_KEY={upd_api_key}\n")
-                else:
-                    f.write(line)
-        os.environ["INNERTUBE_KEY"] = upd_api_key
-        print(f"{Fore.GREEN}[info]{Fore.RESET} ""InnerTube key updated, reloading...")
-        os.execv(sys.executable, [sys.executable] + sys.argv)

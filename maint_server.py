@@ -185,4 +185,4 @@ if __name__ == "__main__":
             print("Private key not found.")
             sys.exit(-1)
         context.load_cert_chain(certfile=pempath,keyfile=keypath)
-    app.run(host=host,port=port,debug=debugmode,threaded=True,ssl_context=context)
+    app.run(host=host,port=port,debug=debugmode,threaded=True,ssl_context=context,extra_files=["config.xml",".env"])

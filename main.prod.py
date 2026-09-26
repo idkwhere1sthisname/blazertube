@@ -13,9 +13,10 @@ from main import app as yt_prodapp, set_external_API_url, set_version_subpath, s
 from maint_server import app as yt_maintapp
 from hulu_server import app as huluapp
 from netflix_server import app as netflixapp
-from functions import showlanip, clearscreen, update_innertube_key
+from functions import showlanip, clearscreen
 from shared import *
 from video import GetVideo
+from youtubei import InnerTubeAPI
 
 logging.Formatter.converter = time.gmtime
 logging.basicConfig(
@@ -23,6 +24,8 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s (%(filename)s:%(lineno)d) - %(message)s",
     datefmt="%Y-%m-%dT%H:%M:%SZ",
 )
+
+innertube    = InnerTubeAPI(INNERTUBE_KEY)
 
 # defaults
 port         = 80
@@ -197,7 +200,8 @@ if __name__ == "__main__":
             thread = threading.Thread(target=cleanup_schedule,daemon=True,name="btvidcleanupd")
             thread.start()
             if not ENABLE_CREDS_OVERRIDE:
-                update_innertube_key(INNERTUBE_KEY)
+                initial,httpcd = innertube.GetInitialTVHTML(None)
+                innertube.RefreshAllCredentials(InitialHTML=initial,InitialHTTPCode=httpcd)
             set_external_API_url("https","lbl-api.idkwh.ct8.pl","443")
             set_version_subpath("api/ctr/GetVersion.php")
             set_versioned_xlb_subpath("api/ctr/GetVersionedXLB.php")

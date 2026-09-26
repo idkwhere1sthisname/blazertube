@@ -13,6 +13,7 @@ from google.auth.exceptions import RefreshError
 import typing as t
 import werkzeug.datastructures as wd
 import traceback
+import colorama
 
 from shared import *
 import functions as funcmod
@@ -21,6 +22,7 @@ CHANNEL_ID_RE = re.compile(r"UC[A-Za-z0-9_-]{22}")
 TOPIC_ID_RE   = re.compile(r"HC[A-Za-z0-9_-]{11}")
 LIVE_ID_TOPIC = "SBAaOjE-GIlRI"
 TOPIC_TYPES   = t.Literal["edu","education","music","live","sports","autos","gaming","news","tv"]
+Fore = colorama.Fore
 
 def simpletext(obj):
     if not obj: return None
@@ -365,6 +367,7 @@ class InnerTubeAPI:
         self._visitor_data_lock = threading.Lock()
         self._visitor_data_last_fetch = 0
         self._VISITOR_DATA_TTL = 3600
+        colorama.init(autoreset=True)
     def _getidfromhandle(self,handle):
         URL = f"{self.INNERTUBE_URL}/navigation/resolve_url"
         payload = {
@@ -454,6 +457,108 @@ class InnerTubeAPI:
                 if token:
                     tokens.append(token)
         return tokens[-1] if tokens else None
+    @staticmethod
+    def _fetch_initial_TVHTML(overrideUA=None):
+        print("%s[info]%s Updating InnerTube key/OAuth2 values..."%(Fore.BLUE,Fore.RESET))
+        headers = {
+            "User-Agent": overrideUA if overrideUA else TV_USERAGENT,
+        }
+        try:
+            r = requests.get("https://www.youtube.com/tv",headers=headers,timeout=55)
+            r.raise_for_status()
+            return r.text,r.status_code
+        except (requests.RequestException,requests.ReadTimeout):
+            return None,r.status_code
+    @staticmethod
+    def _get_innertube_key(initial,fallback):
+        if initial:
+            m = re.search(r'"INNERTUBE_API_KEY":"([^"]+)"',initial)
+            upd_api_key = m.group(1) if m else None
+            if not upd_api_key:
+                return fallback,True
+            return upd_api_key,False
+        return None
+    @staticmethod
+    def _get_oauth_client_id(initial,alt:bool=False):
+        ids = re.findall(r'clientId\s*:\s*["\']([^"\']+\.apps\.googleusercontent\.com)["\']',initial)
+        i = 1 if alt else 0
+        return ids[i] if len(ids) > i else None
+    @staticmethod
+    def _get_oauth_client_secret(initial,alt:bool=False):
+        secret = re.findall(r'F\s*:\s*["\']([^"\']+)["\']',initial)
+        i = 1 if alt else 0
+        return secret[i] if len(secret) > i else None
+    def _get_innertube_client_pair(self,initial,alt:bool=False):
+        return (
+            self._get_oauth_client_id(initial=initial,alt=alt),
+            self._get_oauth_client_secret(initial=initial,alt=alt),
+        )
+    def _refresh_innertube_vals(self,initial,initial_httpcd):
+        if not initial:
+            print(f"{Fore.RED}[error]{Fore.RESET} Couldn't fetch YouTube TV HTML (HTTP {initial_httpcd})")
+            return False
+        innertubeKey = self.INNERTUBE_KEY
+        upd_api_key,isfallback = self._get_innertube_key(initial,innertubeKey)
+        oauth_client_id,oauth_client_secret = self._get_innertube_client_pair(initial,False)
+        alt_client_id,alt_client_secret = self._get_innertube_client_pair(initial,True)
+        login_scope = """https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/youtube-paid-content"""
+        if not oauth_client_id or not oauth_client_secret:
+            print(f"{Fore.YELLOW}[warning]{Fore.RESET} couldn't find OAuth2 client secret / client ID")
+        if not alt_client_secret or not alt_client_id:
+            print(f"{Fore.YELLOW}[warning]{Fore.RESET} couldn't find alt. OAuth2 client secret / client ID")
+        newenv = {}
+        if not isfallback and upd_api_key:
+            newenv["INNERTUBE_KEY"] = upd_api_key
+        if oauth_client_id:
+            newenv["OAUTH_CLIENT_ID"] = oauth_client_id
+        if alt_client_id:
+            newenv["ALT_CLIENT_ID"] = alt_client_id
+        if alt_client_secret:
+            newenv["ALT_CLIENT_SECRET"] = alt_client_secret
+        if oauth_client_secret:
+            newenv["OAUTH_CLIENT_SECRET"] = oauth_client_secret
+        newenv["LOGIN_SCOPE"] = login_scope
+        if not newenv:
+            print(f"{Fore.YELLOW}[warning]{Fore.RESET} no credentials found to update")
+            return False
+        try:
+            with open(".env","r",encoding="utf-8") as f:
+                lines = f.readlines()
+        except OSError as e:
+            print(f"{Fore.RED}[error]{Fore.RESET} couldn't read .env: {e}")
+            return False
+        has_upd = False
+        found = set()
+        nl = []
+        for l in lines:
+            for k,v in newenv.items():
+                if l.startswith(f"{k}="):
+                    found.add(k)
+                    curval = l.rstrip("\r\n").split("=",1)[1]
+                    if curval != v:
+                        print(f"{Fore.BLUE}[info]{Fore.RESET} updating: {k}")
+                        l = f"{k}={v}\n"
+                        has_upd = True
+                    break
+            nl.append(l)
+        for k,v in newenv.items():
+            if k not in found:
+                nl.append(f"{k}={v}\n")
+                print(f"{Fore.BLUE}[info]{Fore.RESET} adding: {k}")
+                has_upd = True
+        if not has_upd:
+            print(f"{Fore.BLUE}[info]{Fore.RESET} InnerTube key / OAuth2 values are up to date")
+            return False
+        try:
+            with open(".env","w",encoding="utf-8") as f:
+                f.writelines(nl)
+        except OSError as e:
+            print(f"{Fore.RED}[error]{Fore.RESET} couldn't write to .env: {e}")
+            return False
+        for k,v in newenv.items():
+            os.environ[k] = v
+        print(f"{Fore.GREEN}[info]{Fore.RESET} InnerTube key / OAuth2 values updated")
+        return True
     @staticmethod
     def _extract_continuation_cnt_pl(data):
         if not isinstance(data,dict):
@@ -1782,8 +1887,11 @@ class InnerTubeAPI:
         feeditems = []
         for section in sections:
             shelf = section.get("shelfRenderer")
-            if not shelf: continue
+            if not shelf:
+                continue
             title = self._shelf_title(shelf)
+            if title.lower() == "shorts":
+                continue
             items = shelf.get("content",{}).get("horizontalListRenderer",{}).get("items",[])
             shelfitems = []
             for item in items:
@@ -2525,6 +2633,11 @@ class InnerTubeAPI:
         return self._channel_action(oauth_token=oauth_token,channelId=channelId,subscribing=subscribing,hl=hl,gl=gl)
     def MyVideos(self,oauth_token:str,hl:str="en",gl:str="US",continuation_token:str|None=None) -> tuple[dict, str | None] | tuple[list, str | None]:
         return self._get_ownvideos(oauth_token=oauth_token,hl=hl,gl=gl,continuation_token=continuation_token)
+    # credentials refreshing
+    def GetInitialTVHTML(self,OverrideUserAgent:str|None=None) -> (tuple[str, int] | tuple[None, int]):
+        return self._fetch_initial_TVHTML(overrideUA=OverrideUserAgent)
+    def RefreshAllCredentials(self,InitialHTML:str,InitialHTTPCode:int) -> bool:
+        return self._refresh_innertube_vals(initial=InitialHTML,initial_httpcd=InitialHTTPCode)
     # wrapper of a wrapper
     # topic channels
     def GetTopicVideos(self,keyword:TOPIC_TYPES,hl:str="en",gl:str="US",continuation_token:str|None=None) -> tuple[list, None, None] | tuple[list, t.Any | None, t.LiteralString | None] | dict:

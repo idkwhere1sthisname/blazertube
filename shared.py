@@ -20,6 +20,9 @@ else:
     OAUTH_ID            = os.getenv("OAUTH_CLIENT_ID")
     OAUTH_SECRET        = os.getenv("OAUTH_CLIENT_SECRET")
     LOGIN_SCOPE         = os.getenv("LOGIN_SCOPE")
+if not OAUTH_ID or not OAUTH_SECRET:
+    OAUTH_ID            = os.getenv("ALT_CLIENT_ID")
+    OAUTH_SECRET        = os.getenv("ALT_CLIENT_SECRET")
 DEFAULT_DEVICE_ID       = os.getenv("DEFAULT_DEVICE_ID")
 DEFAULT_DEVICE_MODEL    = os.getenv("DEFAULT_DEVICE_MODEL")
 FLASK_SECRET_KEY        = os.getenv("FLASK_SECRET_KEY")
