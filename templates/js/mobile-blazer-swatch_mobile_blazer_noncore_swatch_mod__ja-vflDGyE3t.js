@@ -170,7 +170,7 @@ if(!Sg){function ACSHR(){V.call(this,"account_sharing",{},function(a){return(DG(
 //if(!Sg){function ACN(a){V.call(this,"account_notifications",a,oC);this.MB=null;this.na=false;}G(ACN,V);ka(ACN);ACN.prototype.$=pC.prototype.$;ACN.prototype.hf=function(a){if(!this.MB){this.MB=new vG();}return V.prototype.hf.call(this,a);};Mn("account_notifications",ACN);}
 
 // a few paths rewrites
-Jn.my_history=new oB("feed/history");Jn.recommended=new oB("feed/river");Jn.my_favorites=new tB("playlist",{list:"LL"});Jn.subscription_manager=new oB("channels/manager");Jn.popular=new oB("feed/popular");
+Jn.my_history=new oB("feed/history");Jn.recommended=new oB("feed/river");Jn.my_favorites=new tB("playlist",{list:"LL"});Jn.subscription_manager=new oB("channels/manager");Jn.popular=new oB("{{POPULAR_PATH}}");
 // my_channel handler (signed-in only)
 {% if signinbool %}
 Jn.my_channel = new oB("channel/{{USER_ID}}");

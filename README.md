@@ -52,6 +52,7 @@ See [this guide](/self_host_guide.md) to learn how self host your own instance, 
 - Region/language switching
 - Safety mode (called safe mode in the app itself)
 - Creating playlists (only when using the public Data API login system)
+- Playing shorts
 
 ## Known bugs
 

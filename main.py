@@ -924,7 +924,9 @@ def blazer_js():
     finalhost = request.host
     signinbool = g.SIGNED_IN
     userId = "null"
+    popularPath = "feed"
     if signinbool:
+        popularPath = "feed/popular"
         if g.INFO:
             if g.INFO["handle"] and g.INFO["haschannel"]:
                 if innertube.GetChannelIDFromHandle(g.INFO["handle"]):
@@ -935,7 +937,7 @@ def blazer_js():
         link = TOPIC_LINKS.get(t,"")
         jstopics.append(f'Jn.{t}=new oB("/topic/{link}")')
     topics_template = ";".join(jstopics)
-    return Response(render_template(jspath,debug=debugmode,host=finalhost,signinbool=signinbool,USER_ID=userId,channeltopicsJN=topics_template), headers={"Content-Type":"application/javascript"})
+    return Response(render_template(jspath,debug=debugmode,host=finalhost,signinbool=signinbool,USER_ID=userId,channeltopicsJN=topics_template,POPULAR_PATH=popularPath), headers={"Content-Type":"application/javascript"})
 @app.route("/mobile-blazer-swatch_mobile_blazer_noncore_swatch_mod__en_gb-vfljD38pu.js")
 def blazer_js_en():
     return Response(render_template("js/mobile-blazer-swatch_mobile_blazer_noncore_swatch_mod__en_gb-vfljD38pu.js"), headers={"Content-Type":"application/javascript"})

@@ -133,14 +133,17 @@ class GetVideo:
             return None
         clients = ["web","web_safari","web_embedded","android","ios","android_vr","vision_os","tv","tv_simply","tv_downgraded","mweb"]
         for cl in clients:
+            fmtclient = cl.upper().replace("_"," ")
             try:
                 stream = extract(cl)
                 if stream:
+                    if self.debugmode:
+
+                        print("%s[stream]%s %s (%s) client succeeded!"%(Fore.GREEN,Fore.RESET,fmtclient,cl))
                     return stream
             except Exception as e:
-                fmtclient = cl.upper().replace("_"," ")
                 if self.debugmode:
-                    print(f"{Fore.RED}[stream]{Fore.RESET} {fmtclient} client failed:", e)
+                    print(f"{Fore.RED}[stream]{Fore.RESET} {fmtclient} ({cl}) client failed:", e)
                 else:
                     print(f"{Fore.RED}[stream]{Fore.RESET} {fmtclient} client failed. This might happen sometimes.")
                     if fmtclient.lower() == "mweb":
