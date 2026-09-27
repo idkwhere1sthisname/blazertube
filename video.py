@@ -95,13 +95,14 @@ class GetVideo:
             path.unlink()
         except OSError:
             pass
-    def fetchStream(self, lang:str, country:str, videoId:str, oauthToken:str | None = None) -> str:
+    def fetchStream(self, lang:str, country:str, videoId:str, oauthToken:str | None = None, new3DS:bool = False) -> str:
         url = f"https://www.youtube.com/watch?v={videoId}"
         verbose = no_warnings = self.debugmode
         quiet = not self.debugmode
         def extract(client):
+            request_fmt = "92/91/18/best[height<=360]" if not new3DS and client == "web_safari" else "18/best[height<=360]"
             ydl_opts = {
-                "format": "best[height<=360]",
+                "format": request_fmt,
                 "quiet": quiet,
                 "no_warnings": no_warnings,
                 "verbose": verbose,
@@ -130,19 +131,19 @@ class GetVideo:
                     if f.get("height", 0) <= 360 and f.get("url"):
                         return f["url"]
             return None
-        cl = ["web","android","ios","android_vr","tv","mweb"]
-        for client in cl:
+        clients = ["web","web_safari","web_embedded","android","ios","android_vr","vision_os","tv","tv_simply","tv_downgraded","mweb"]
+        for cl in clients:
             try:
-                stream = extract(client)
+                stream = extract(cl)
                 if stream:
                     return stream
             except Exception as e:
-                fmtclient = client.upper().replace("_"," ")
+                fmtclient = cl.upper().replace("_"," ")
                 if self.debugmode:
                     print(f"{Fore.RED}[stream]{Fore.RESET} {fmtclient} client failed:", e)
                 else:
                     print(f"{Fore.RED}[stream]{Fore.RESET} {fmtclient} client failed. This might happen sometimes.")
-                    if fmtclient == "mweb":
+                    if fmtclient.lower() == "mweb":
                         print(f"{Fore.RED}[stream]{Fore.RESET} every client failed. The video might be unavailable.\n{e}")
         return None
     def getVideoOrientation(self, source: Path | str) -> t.Literal["standard", "vertical"]:
@@ -222,7 +223,7 @@ class GetVideo:
         return resp
     def fetchAndLoadStreamOnly_New3DSOnly(self, lang:str, country:str, videoId:str, quality:t.Literal["tiny","small"]="tiny") -> Response:
         self.cleanup()
-        stream_url = self.fetchStream(lang, country, videoId)
+        stream_url = self.fetchStream(lang, country, videoId, new3DS=True)
         if not stream_url:
             return Response("Error fetching video stream", status=500)
         return redirect(stream_url)
@@ -290,7 +291,7 @@ class GetVideo:
             if self.debugmode:
                 print(f"{Fore.BLUE}[dl+encode]{Fore.RESET} Done! Returning Range and video...")
             return self.sendFileRange(str(tinypath),mime="video/mp4")
-        stream_url = self.fetchStream(lang,country,videoId)
+        stream_url = self.fetchStream(lang,country,videoId,new3DS=False)
         if not stream_url:
             return Response("Error fetching video stream", status=500)
         orientation = self.getVideoOrientation(stream_url)

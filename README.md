@@ -51,6 +51,7 @@ See [this guide](/self_host_guide.md) to learn how self host your own instance, 
 - Browsing recommended channels
 - Region/language switching
 - Safety mode (called safe mode in the app itself)
+- Creating playlists (only when using the public Data API login system)
 
 ## Known bugs
 
@@ -65,7 +66,6 @@ See [this guide](/self_host_guide.md) to learn how self host your own instance, 
 - Viewing personal playlists
 - Actual channel topics (instead of it being a shortcut to search)(?)
 - Adding inbox and social if possible
-- Creating playlists
 
 ## FAQ
 

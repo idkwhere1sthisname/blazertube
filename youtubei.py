@@ -293,6 +293,63 @@ class GDataAPI:
         return {
             "items": items
         }
+    def _create_playlist_gdataoauthonly(self,title=None,description=None,oauth_token=None,privacyStatus:t.Literal["PRIVATE","UNLISTED","PUBLIC"]="PRIVATE"):
+        if not oauth_token or not title or privacyStatus not in ["PRIVATE","UNLISTED","PUBLIC"]:
+            return None,400
+        headers = {
+            "Authorization": f"Bearer {oauth_token}",
+            "Content-Type": "application/json",
+        }
+        params = {
+            "part": "snippet,status",
+        }
+        _status_final = privacyStatus.lower()
+        payload = {
+            "snippet": {
+                "title": title,
+                "description": description,
+            },
+            "status": {
+                "privacyStatus": _status_final,
+            }
+        }
+        try:
+            r = requests.post("https://www.googleapis.com/youtube/v3/playlists",headers=headers,json=payload,params=params)
+            r.raise_for_status()
+            data = r.json()
+            returncd = r.status_code
+            return data.get("id",""),returncd
+        except (requests.RequestException,ValueError) as e:
+            print(f"Data API error: {e}")
+            print(r.text)
+            return None,r.status_code
+    def _add_vid_to_playlist(self,oauth_token,plID,vidID):
+        if not oauth_token or not plID or not vidID:
+            return None
+        headers = {
+            "Authorization": f"Bearer {oauth_token}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "snippet": {
+                "playlistId": plID,
+                "resourceId": {
+                    "kind": "youtube#video",
+                    "videoId": vidID,
+                }
+            }
+        }
+        params = {
+            "part": "snippet",
+        }
+        try:
+            r = requests.post("https://www.googleapis.com/youtube/v3/playlistItems",headers=headers,json=payload,params=params)
+            r.raise_for_status()
+            return r.status_code
+        except requests.RequestException as e:
+            print(f"Data API error: {e}")
+            print(r.text)
+            return r.status_code
     def _get_channel_info(self,channelId):
         if not self.GDATA_API_KEY:
             return None
@@ -353,6 +410,10 @@ class GDataAPI:
         return self._get_trending(limit=limit)
     def GetChannelInfo(self,channelId:str) -> dict[str, t.Any] | None:
         return self._get_channel_info(channelId)
+    def CreateNewPlaylist(self,oauth_token:str,privacyStatus:str|t.Literal["PRIVATE","PUBLIC","UNLISTED"],playlistTitle:str|t.LiteralString,playlistDescription:str|t.LiteralString|None=None) -> (tuple[None, t.Literal[400]] | tuple[t.Any, int] | tuple[None, int]):
+        return self._create_playlist_gdataoauthonly(title=playlistTitle,description=playlistDescription,oauth_token=oauth_token,privacyStatus=privacyStatus)
+    def AddVideoToPlaylist(self,playlistId:str,oauth_token:str,videoId:str) -> (int | None):
+        return self._add_vid_to_playlist(plID=playlistId,vidID=videoId,oauth_token=oauth_token)
 
 class InnerTubeAPI:
     def __init__(self, innerTubeKey:str) -> None:
@@ -673,7 +734,6 @@ class InnerTubeAPI:
             style = tile.get("style")
             isshort = (contentType == "TILE_CONTENT_TYPE_SHORTS" or style == "TILE_STYLE_YTLR_SHORTS" or "reelWatchEndpoint" in tile.get("onSelectCommand",{}))
             if remove_shorts and isshort:
-                print("removing short")
                 continue
             vid = tile.get("contentId")
             if not vid or vid in seen:
@@ -2255,6 +2315,8 @@ class InnerTubeAPI:
         minutes,seconds = divmod(v["duration_seconds"],60)
         duration = f"{minutes}:{seconds:02d}"
         vid_id = v["video_id"]
+        if duration == "0:00":
+            duration = self._get_video_duration(vid_id)
         thumb = funcmod.getThumbnail(vid_id)
         return {
             "content_type": 500,

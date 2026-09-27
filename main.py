@@ -2673,10 +2673,11 @@ def manage_playlist():
     cookies = request.cookies
     playlist_to_add = data.get("action_view_playlists_to_add","0") == "1"
     action_delete_video = data.get("action_delete","0") == "1"
-    action_favorite = data.get("action_favorite","0") == "1"
     action_create_playlist = formdata.get("action_create_playlist","0") == "1"
     action_add_to_playlist = formdata.get("action_add_to_playlist","0") == "1"
+    # these should never get requested
     action_reorder = formdata.get("action_reorder","0") == "1"
+    action_favorite = data.get("action_favorite","0") == "1"
     oauth_token = cookies.get("oauth_token") or g.OAUTH_TOKEN
     hl = cookies.get("hl") or g.HL
     gl = cookies.get("gl") or g.GL
@@ -2704,8 +2705,6 @@ def manage_playlist():
             },
         }
     elif action_create_playlist:
-        # i dont think the TV client can create playlists
-        # also not WEB without cookies
         playlist_name = formdata.get("playlist_name") or None
         v = formdata.get("v") or None
         json_r = {
@@ -2713,8 +2712,22 @@ def manage_playlist():
             "errors": [],
             "location": None,
         }
-        json_r["errors"] = ["Couldn't create playlist. Please try again."]
-        json_r_footer["result"] = "error"
+        if not ENABLE_CREDS_OVERRIDE:
+            json_r["errors"] = ["Couldn't create playlist. Please try again."]
+            json_r_footer["result"] = "error"
+        else:
+            visibility = "PRIVATE"
+            newplaylistID,returncd = gdata.CreateNewPlaylist(oauth_token=oauth_token,privacyStatus=visibility,playlistTitle=playlist_name,playlistDescription=None)
+            createplaylist_success = (200 <= returncd <= 299)
+            if not createplaylist_success:
+                json_r["errors"] = ["Couldn't create playlist. Please try again."]
+                json_r_footer["result"] = "error"
+            else:
+                addvid_returncd = gdata.AddVideoToPlaylist(newplaylistID,oauth_token,videoId=v)
+                addvid_success = (200 <= addvid_returncd <= 299)
+                if not addvid_success:
+                    json_r["errors"] = ["Couldn't add video to playlist. Please try again."]
+                    json_r_footer["result"] = "error"
     elif action_delete_video:
         v = formdata.get("v") or None
         plid = formdata.get("p") or None
