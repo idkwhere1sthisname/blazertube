@@ -97,8 +97,8 @@ class GetVideo:
             pass
     def fetchStream(self, lang:str, country:str, videoId:str, oauthToken:str | None = None, new3DS:bool = False) -> str:
         url = f"https://www.youtube.com/watch?v={videoId}"
-        verbose = no_warnings = self.debugmode
-        quiet = not self.debugmode
+        verbose = self.debugmode
+        quiet = no_warnings = not self.debugmode
         def extract(client):
             request_fmt = "92/91/18/best[height<=360]" if not new3DS and client == "web_safari" else "18/best[height<=360]"
             ydl_opts = {
@@ -138,7 +138,6 @@ class GetVideo:
                 stream = extract(cl)
                 if stream:
                     if self.debugmode:
-
                         print("%s[stream]%s %s (%s) client succeeded!"%(Fore.GREEN,Fore.RESET,fmtclient,cl))
                     return stream
             except Exception as e:
@@ -146,7 +145,7 @@ class GetVideo:
                     print(f"{Fore.RED}[stream]{Fore.RESET} {fmtclient} ({cl}) client failed:", e)
                 else:
                     print(f"{Fore.RED}[stream]{Fore.RESET} {fmtclient} client failed. This might happen sometimes.")
-                    if fmtclient.lower() == "mweb":
+                    if fmtclient.lower() == clients[-1]:
                         print(f"{Fore.RED}[stream]{Fore.RESET} every client failed. The video might be unavailable.\n{e}")
         return None
     def getVideoOrientation(self, source: Path | str) -> t.Literal["standard", "vertical"]:
@@ -182,17 +181,7 @@ class GetVideo:
             print(f"{Fore.BLUE}[orientation]{Fore.RESET} got {width}x{height}")
         return "vertical" if height > width else "standard"
     @staticmethod
-    def qualityLabel(probejson: list | dict | t.Mapping[str, t.Any]) -> t.Literal["tiny","small"]:
-        h = probejson.get("height")
-        if not h:
-            return None
-        if h >= 144:
-            return "tiny"
-        elif h >= 240:
-            return "small"
-        return "small"
-    @staticmethod
-    def getScale(orientation, quality: str) -> t.Literal["scale=-2:240", "scale=256:240", "scale=-2:144", "scale=160:144"]:
+    def getScale(orientation: t.Literal["tiny","small"], quality: str) -> t.Literal["scale=-2:240", "scale=256:240", "scale=-2:144", "scale=160:144"]:
         if quality == "small":
             return "scale=-2:240" if orientation == "vertical" else "scale=256:240"
         return "scale=-2:144" if orientation == "vertical" else "scale=160:144"
