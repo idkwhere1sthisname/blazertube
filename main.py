@@ -52,6 +52,7 @@ app            = Flask("BlazerTube",static_folder="static",template_folder="temp
 app.wsgi_app   = ProxyFix(app.wsgi_app,x_for=1,x_proto=1,x_host=1,x_port=1)
 limiter        = Limiter(app=app,key_func=get_remote_address,default_limits=["100 per minute"],storage_uri="memory://")
 ipban          = IpBan(app,ban_seconds=86400)
+WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
 gdata          = GDataAPI(
                     GDataKey=GDATA_API_KEY,
@@ -3275,7 +3276,6 @@ def after_request(response:Response):
 
 # main
 if __name__ == "__main__":
-    WSGIRequestHandler.protocol_version = "HTTP/1.1"
     loadcfg()
     if not cfgexist:
         funcmod.clearscreen()
