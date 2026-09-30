@@ -25,6 +25,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app,x_for=1,x_proto=1,x_host=1,x_port=1)
 limiter = Limiter(app=app,key_func=get_remote_address,default_limits=["100 per minute"],storage_uri="memory://")
 compress = Compress(app)
 ipban = IpBan(app)
+WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
 app.config["COMPRESS_REGISTER"] = True
 app.config["COMPRESS_STREAMS"] = False
@@ -163,7 +164,6 @@ def unavailable(err):
     return Response(render_template("errors/502.html"))
 
 if __name__ == "__main__":
-    WSGIRequestHandler.protocol_version = "HTTP/1.1"
     loadcfg()
     if not cfgexist:
         print("Please run main.py to set up a configuration file.")
