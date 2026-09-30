@@ -35,7 +35,6 @@
             <p>To replace an empty value in the configuration XML, remove <code>xsi:nil</code> and add a valid value.</p>
             <center>
                 <img src="&logo_BETA;" width="&stdwidth;" draggable="false" /><br /><br />
-                <a href="http://google.com">BlazerTube website</a>
             </center>
         </xs:documentation>
     </xs:annotation>

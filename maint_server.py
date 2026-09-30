@@ -29,8 +29,10 @@ WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
 app.config["COMPRESS_REGISTER"] = True
 app.config["COMPRESS_STREAMS"] = False
+
 allowedfile = METADIR/"allowed.yml"
 nuisancesfile = METADIR/"nuisances.yml"
+
 ipban.load_allowed(allowedfile if allowedfile.is_file() else None)
 ipban.load_nuisances(nuisancesfile if nuisancesfile.is_file() else None)
 

@@ -26,6 +26,7 @@ app             = Flask("NASC Server")
 app.wsgi_app    = ProxyFix(app.wsgi_app,x_for=1,x_proto=1,x_host=1,x_port=1)
 ipban           = IpBan(app)
 limiter         = Limiter(app=app,key_func=get_remote_address,default_limits=["70 per minute"],storage_uri="memory://")
+WSGIRequestHandler.protocol_version = "HTTP/1.1"
 
 ipban.load_allowed(allowedfile if allowedfile.is_file() else None)
 ipban.load_nuisances(nuisancesfile if nuisancesfile.is_file() else None)
@@ -169,7 +170,6 @@ def loadcfg():
     debugmode = bool(safeget("debugging","false").lower() == "true")
 
 if __name__ == "__main__":
-    WSGIRequestHandler.protocol_version = "HTTP/1.1"
     if not config.is_file():
         print("Please run main.py to create a configuration file first.")
         sys.exit(-1)

@@ -313,8 +313,9 @@ class GDataAPI:
                 "privacyStatus": _status_final,
             }
         }
+        url = self.GDATA_API_URL+"/playlists"
         try:
-            r = requests.post("https://www.googleapis.com/youtube/v3/playlists",headers=headers,json=payload,params=params)
+            r = requests.post(url,headers=headers,json=payload,params=params)
             r.raise_for_status()
             data = r.json()
             returncd = r.status_code
@@ -396,7 +397,130 @@ class GDataAPI:
             "age": None,
             "hometown": None,
         }
-
+    def _get_i18n_hl(self,hl="en_US"):
+        if not self.GDATA_API_KEY:
+            return None
+        url = self.GDATA_API_URL+"/i18nLanguages"
+        params = {
+            "part": "snippet",
+            "hl": hl,
+            "key": self.GDATA_API_KEY
+        }
+        try:
+            r = requests.get(url,params=params)
+            r.raise_for_status()
+            data = r.json()
+        except (requests.RequestException,ValueError):
+            return None
+        languages = []
+        for i in data.get("items",[]):
+            snippet = i.get("snippet",{})
+            languages.append({
+                "hl": i.get("id") or snippet.get("hl",""),
+                "name": snippet.get("name",""),
+            })
+        return languages
+    def _get_i18n_gl(self,gl="US"):
+        if not self.GDATA_API_KEY:
+            return None
+        url = self.GDATA_API_URL+"/i18nRegions"
+        params = {
+            "part": "snippet",
+            "hl": gl,
+            "key": self.GDATA_API_KEY
+        }
+        try:
+            r = requests.get(url,params=params)
+            r.raise_for_status()
+            data = r.json()
+        except (requests.RequestException,ValueError):
+            return None
+        regions = []
+        for i in data.get("items",[]):
+            snippet = i.get("snippet",{})
+            regions.append({
+                "gl": i.get("id") or snippet.get("gl",""),
+                "name": snippet.get("name",""),
+            })
+        return regions
+    def _get_reportreasons(self,oauth_token,hl="en_US"):
+        if not self.GDATA_API_KEY or not oauth_token:
+            return None,None
+        url = self.GDATA_API_URL+"/videoAbuseReportReasons"
+        params = {
+            "key": self.GDATA_API_KEY,
+            "part": "snippet,id",
+            "hl": hl,
+        }
+        headers = {
+            "Authorization": f"Bearer {oauth_token}",
+        }
+        try:
+            r = requests.get(url,params=params,headers=headers)
+            r.raise_for_status()
+            data = r.json()
+        except (requests.RequestException,ValueError):
+            return None,None
+        reasons = []
+        secondaryReasons = []
+        for i in data.get("items",[]):
+            snippet = i.get("snippet",{})
+            reasons.append({
+                "id": i.get("id"),
+                "label": snippet.get("label"),
+                "secondary": False,
+                "parentId": None,
+            })
+            for secondaryReason in snippet.get("secondaryReasons",[]):
+                secondaryReasons.append({
+                    "id": secondaryReason.get("id"),
+                    "label": secondaryReason.get("label"),
+                    "secondary": True,
+                    "parentId": i.get("id"),
+                })
+        return reasons,secondaryReasons
+    def _reportvideo(self,oauth_token,videoId,reasonId,secondaryReasonId=None,comments=None,hl="en_US"):
+        if not self.GDATA_API_KEY or not oauth_token or not reasonId:
+            return False
+        params = {
+            "onBehalfOfContentOwner": "false",
+        }
+        payload = {
+            "videoId": videoId,
+            "reasonId": reasonId,
+            "secondaryReasonId": secondaryReasonId,
+            "comments": comments,
+            "language": hl,
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {oauth_token}",
+        }
+        url = self.GDATA_API_URL+"/videos/reportAbuse"
+        try:
+            r = requests.post(url,json=payload,params=params,headers=headers)
+            r.raise_for_status()
+            return r.status_code == 204
+        except requests.RequestException:
+            return False
+    def _is_token_GDATA_enabled(self,oauth_token:str) -> bool:
+        if not self.GDATA_API_KEY or not oauth_token:
+            return False
+        url = self.GDATA_API_URL+"/subscriptions"
+        params = {
+            "maxResults": "0",
+            "mine": "true",
+            "key": self.GDATA_API_KEY,
+        }
+        headers = {
+            "Authorization": f"Bearer {oauth_token}",
+        }
+        try:
+            r = requests.get(url,params=params,headers=headers,timeout=75)
+            r.raise_for_status()
+            return (200 <= r.status_code <= 399)
+        except requests.RequestException:
+            return False
     # public methods
     def GetVideoCount(self,channelId:str) -> str | int | t.Literal[0]:
         return self._gdata_getvideocount(channelId)
@@ -414,6 +538,15 @@ class GDataAPI:
         return self._create_playlist_gdataoauthonly(title=playlistTitle,description=playlistDescription,oauth_token=oauth_token,privacyStatus=privacyStatus)
     def AddVideoToPlaylist(self,playlistId:str,oauth_token:str,videoId:str) -> (int | None):
         return self._add_vid_to_playlist(plID=playlistId,vidID=videoId,oauth_token=oauth_token)
+    def GetLanguages(self,hl:str|t.Literal["en_US"]="en_US") -> list | None:
+        return self._get_i18n_hl(hl=hl)
+    def GetRegions(self,gl:str|t.Literal["US"]="US") -> list | None:
+        return self._get_i18n_gl(gl=gl)
+    def GetLocalizedReportReasons(self,oauth_token:str,hl:str|t.Literal["en_US"]="en_US") -> tuple[None, None] | tuple[list, list]:
+        return self._get_reportreasons(oauth_token=oauth_token,hl=hl)
+    # untested
+    def ReportVideo(self,oauth_token:str,videoId:str,reasonId:str,secondaryReasonId:str|None=None,comments:str|None=None,hl:str|None=None) -> bool:
+        return self._reportvideo(oauth_token=oauth_token,videoId=videoId,reasonId=reasonId,secondaryReasonId=secondaryReasonId,comments=comments,hl=hl)
 
 class InnerTubeAPI:
     def __init__(self, innerTubeKey:str) -> None:
@@ -2647,7 +2780,57 @@ class InnerTubeAPI:
         except (requests.RequestException,Exception):
             return ""
         return data
-
+    def _get_reportreasons(self,oauth_token,videoId,hl="en",gl="US",safeMode=False):
+        if not oauth_token or not videoId:
+            return None
+        _context = self._build_tv_context(hl=hl,gl=gl,safe_mode=safeMode)
+        payload = {
+            "context": _context,
+            "clientSideParams": {
+                "videoId": "hn-rV62vHRc",
+                "reportFormType": "REPORT_FORM_TYPE_TOU",
+                "reportFormContext": "REPORT_FORM_CONTEXT_WATCH",
+                "isLiveNow": False,
+            }
+        }
+        headers = self._build_tv_headers(oauth_token=oauth_token)
+        params = self._build_innertube_params()
+        url = self.INNERTUBE_URL+"/flag/get_form"
+        try:
+            r = requests.post(url,json=payload,headers=headers,params=params)
+            r.raise_for_status()
+            data = r.json()
+        except (requests.RequestException,ValueError):
+            return None
+        reasons = []
+        items = data.get("reportFormResponseSupportedRenderers",{}).get("menuRenderer",{}).get("items",[])
+        for i in items:
+            renderer = i.get("menuServiceItemRenderer",{})
+            label = simpletext(renderer.get("text"))
+            authcmd = renderer.get("serviceEndpoint",{}).get("authDeterminedCommand",{}).get("authenticatedCommand",{})
+            flagparam = authcmd.get("flagEndpoint",{}).get("flagAction","")
+            if label:
+                reasons.append({
+                    "label": label,
+                    "param": flagparam
+                })
+        return reasons
+    def _reportvideo(self,oauth_token,videoId,flagAction,safe_mode=False):
+        if not oauth_token or not videoId or not flagAction:
+            return False
+        payload = {
+            "context": self._build_tv_context(safe_mode=safe_mode),
+            "action": flagAction,
+        }
+        headers = self._build_tv_headers(oauth_token)
+        params = self._build_innertube_params()
+        url = self.INNERTUBE_URL+"/flag/flag"
+        try:
+            r = requests.post(url,params=params,json=payload,headers=headers)
+            r.raise_for_status()
+            return (200 <= r.status_code <= 399)
+        except requests.RequestException:
+            return False
     # public methods
     def CompleteSearch(self,query:str,hl:str="en",gl:str="US") -> str:
         return self._completesearch(query=query,hl=hl,gl=gl)
@@ -2695,6 +2878,11 @@ class InnerTubeAPI:
         return self._channel_action(oauth_token=oauth_token,channelId=channelId,subscribing=subscribing,hl=hl,gl=gl)
     def MyVideos(self,oauth_token:str,hl:str="en",gl:str="US",continuation_token:str|None=None) -> tuple[dict, str | None] | tuple[list, str | None]:
         return self._get_ownvideos(oauth_token=oauth_token,hl=hl,gl=gl,continuation_token=continuation_token)
+    # untested
+    def GetReportReasons(self,oauth_token:str,videoId:str,hl:str|t.Literal["en"]="en",gl:str|t.Literal["US"]="US",safety_mode:bool=False) -> list | None:
+        return self._get_reportreasons(oauth_token=oauth_token,videoId=videoId,hl=hl,gl=gl,safeMode=safety_mode)
+    def ReportVideo(self,oauth_token:str,videoId:str,flagAction:str,safe_mode:bool=False) -> bool:
+        return self._reportvideo(oauth_token=oauth_token,videoId=videoId,flagAction=flagAction,safe_mode=safe_mode)
     # credentials refreshing
     def GetInitialTVHTML(self,OverrideUserAgent:str|None=None) -> (tuple[str, int] | tuple[None, int]):
         return self._fetch_initial_TVHTML(overrideUA=OverrideUserAgent)

@@ -67,6 +67,8 @@ See [this guide](/self_host_guide.md) to learn how self host your own instance, 
 - Viewing personal playlists
 - Actual channel topics (instead of it being a shortcut to search)(?)
 - Adding inbox and social if possible
+- Adding videos to watch history when watched
+- Reporting videos in app
 
 ## FAQ
 
