@@ -540,8 +540,8 @@ class GDataAPI:
         return self._add_vid_to_playlist(plID=playlistId,vidID=videoId,oauth_token=oauth_token)
     def GetLocalizedLanguagesList(self,hl:str|t.Literal["en_US"]="en_US") -> list | None:
         return self._get_i18n_hl(hl=hl)
-    def GetLocalizedRegionsList(self,hl:str|t.Literal["en"],gl:str|t.Literal["US"]="US") -> list | None:
-        return self._get_i18n_gl(hl=hl,gl=gl)
+    def GetLocalizedRegionsList(self,hl:str|t.Literal["en"]) -> list | None:
+        return self._get_i18n_gl(hl=hl)
     def GetLocalizedReportReasonsList(self,oauth_token:str,hl:str|t.Literal["en_US"]="en_US") -> tuple[None, None] | tuple[list, list]:
         return self._get_reportreasons(oauth_token=oauth_token,hl=hl)
     # untested
