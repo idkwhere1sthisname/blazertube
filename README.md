@@ -96,6 +96,6 @@ python -c "import platform; print('python version:', platform.python_version(), 
 
 [Tanjirokamado12](https://github.com/Tanjirokamado12): [Inject](/patcher/lib/inject.py) portion of the patcher
 
-[Liinback](https://github.com/liinbacklite): [Video loader](/video.py), [captions](/captions.py), [debug](/debug.py) and small portions of [youtubei.py](/youtubei.py). The captions and video modules are based off of [Liinback 3.5](https://github.com/liinbacklite/Liinback)'s implementation, while the debug module is based on Liinback 3.0's implementation.
+[Liinback](https://github.com/redfireMRT84): [Video loader](/video.py), [captions](/captions.py), [debug](/debug.py) and small portions of [youtubei.py](/youtubei.py). The captions and video modules are based off of [Liinback 3.5](https://github.com/liinbacklite/Liinback)'s implementation, while the debug module is based on [Liinback 3.0](https://github.com/RedFireMRT84/Liinback-v3)'s implementation.
 
 [RiiviveTube](https://github.com/ReviveMii/RiiviveTube): Portions of [youtubei.py](/youtubei.py)

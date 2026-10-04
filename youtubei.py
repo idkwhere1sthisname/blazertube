@@ -415,18 +415,18 @@ class GDataAPI:
         languages = []
         for i in data.get("items",[]):
             snippet = i.get("snippet",{})
-            languages.append({
-                "hl": i.get("id") or snippet.get("hl",""),
-                "name": snippet.get("name",""),
-            })
+            languages.append([
+                i.get("id") or snippet.get("hl",""),
+                snippet.get("name",""),
+            ])
         return languages
-    def _get_i18n_gl(self,gl="US"):
+    def _get_i18n_gl(self,hl="en"):
         if not self.GDATA_API_KEY:
             return None
         url = self.GDATA_API_URL+"/i18nRegions"
         params = {
             "part": "snippet",
-            "hl": gl,
+            "hl": hl,
             "key": self.GDATA_API_KEY
         }
         try:
@@ -438,10 +438,10 @@ class GDataAPI:
         regions = []
         for i in data.get("items",[]):
             snippet = i.get("snippet",{})
-            regions.append({
-                "gl": i.get("id") or snippet.get("gl",""),
-                "name": snippet.get("name",""),
-            })
+            regions.append([
+                i.get("id") or snippet.get("gl",""),
+                snippet.get("name",""),
+            ])
         return regions
     def _get_reportreasons(self,oauth_token,hl="en_US"):
         if not self.GDATA_API_KEY or not oauth_token:
@@ -538,11 +538,11 @@ class GDataAPI:
         return self._create_playlist_gdataoauthonly(title=playlistTitle,description=playlistDescription,oauth_token=oauth_token,privacyStatus=privacyStatus)
     def AddVideoToPlaylist(self,playlistId:str,oauth_token:str,videoId:str) -> (int | None):
         return self._add_vid_to_playlist(plID=playlistId,vidID=videoId,oauth_token=oauth_token)
-    def GetLanguages(self,hl:str|t.Literal["en_US"]="en_US") -> list | None:
+    def GetLocalizedLanguagesList(self,hl:str|t.Literal["en_US"]="en_US") -> list | None:
         return self._get_i18n_hl(hl=hl)
-    def GetRegions(self,gl:str|t.Literal["US"]="US") -> list | None:
-        return self._get_i18n_gl(gl=gl)
-    def GetLocalizedReportReasons(self,oauth_token:str,hl:str|t.Literal["en_US"]="en_US") -> tuple[None, None] | tuple[list, list]:
+    def GetLocalizedRegionsList(self,hl:str|t.Literal["en"],gl:str|t.Literal["US"]="US") -> list | None:
+        return self._get_i18n_gl(hl=hl,gl=gl)
+    def GetLocalizedReportReasonsList(self,oauth_token:str,hl:str|t.Literal["en_US"]="en_US") -> tuple[None, None] | tuple[list, list]:
         return self._get_reportreasons(oauth_token=oauth_token,hl=hl)
     # untested
     def ReportVideo(self,oauth_token:str,videoId:str,reasonId:str,secondaryReasonId:str|None=None,comments:str|None=None,hl:str|None=None) -> bool:

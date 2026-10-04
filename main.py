@@ -371,18 +371,14 @@ def serve_index():
     html = html.replace("{{gl}}",gl)
     html = html.replace("{{host}}","%s://%s"%("https" if secureserver else "http",request.host),-1)
     html = html.replace("{{host_noprot}}",request.host,-1)
-    languagespath = METADIR/"language.json"
-    countriespath = METADIR/"country.json"
+    langlist = gdata.GetLocalizedLanguagesList(hl=hl)
+    countrylist = gdata.GetLocalizedRegionsList(hl=hl)
     languageName = "English"
     localeName = "America"
-    langlist = [["en","English"]]
-    countrylist = [["US","America"]]
-    if languagespath.is_file():
-        with open(languagespath,"r",encoding="utf-8") as f:
-            langlist = json.load(f)
-    if countriespath.is_file():
-        with open(countriespath,"r",encoding="utf-8") as f:
-            countrylist = json.load(f)
+    if not langlist:
+        langlist = [["en","English"]]
+    if not countrylist:
+        countrylist = [["US","America"]]
     languageName = next((n for c,n in langlist if c == hl),hl)
     localeName = next((n for c,n in countrylist if c == gl),gl)
     html = html.replace("{{LOCALENAME}}",localeName)
@@ -2175,15 +2171,21 @@ def select_site():
     action_language = data.get("action_language","0") == "1"
     action_country  = data.get("action_country","0") == "1"
     safe_mode = cookies.get("safety_mode","0") == "1"
+    hl = cookies.get("hl","en")
+    gl = cookies.get("gl","US")
     json_r = {}
     if action_language:
         languagespath = METADIR/"language.json"
+        languagelist = gdata.GetLocalizedLanguagesList(hl=hl)
         SUPPORTED_LANGUAGES = [
             ["en","English"]
         ]
-        if languagespath.is_file():
-            with open(languagespath,"r",encoding="utf-8") as f:
-                SUPPORTED_LANGUAGES = json.load(f)
+        if not languagelist:
+            if languagespath.is_file():
+                with open(languagespath,"r",encoding="utf-8") as f:
+                    SUPPORTED_LANGUAGES = json.load(f)
+        else:
+            SUPPORTED_LANGUAGES = languagelist
         token = get_xsrf("xsrf_token","xsrf_token")
         json_r = {
             "content": {
@@ -2192,13 +2194,17 @@ def select_site():
             }
         }
     elif action_country:
-        countryspath = METADIR/"country.json"
+        countriespath = METADIR/"country.json"
+        countrylist = gdata.GetLocalizedRegionsList(hl=hl)
         SUPPORTED_COUNTRIES = [
             ["US","America"]
         ]
-        if countryspath.is_file():
-            with open(countryspath,"r",encoding="utf-8") as f:
-                SUPPORTED_COUNTRIES = json.load(f)
+        if not countrylist:
+            if countriespath.is_file():
+                with open(countriespath,"r",encoding="utf-8") as f:
+                    SUPPORTED_COUNTRIES = json.load(f)
+        else:
+            SUPPORTED_COUNTRIES = countrylist
         token = get_xsrf('xsrf_token','xsrf_token')
         json_r = {
             "content": {
