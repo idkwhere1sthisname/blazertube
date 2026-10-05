@@ -89,6 +89,7 @@ WATCH_LATER_PLAYLIST    = "cAc%3D"
 PARAM_UNSUBSCRIBE       = "CgIIAhgA"
 PARAM_SUBSCRIBE         = "EgIIAhgA"
 PARAM_PLAYLIST_CREATE   = "CAAoAA%3D%3D"
+SEARCH_PARAM_LIVESTREAM = "EgJAAQ%3D%3D" # videos only
 
 # advanced options
 SIGNINDISABLED          = False

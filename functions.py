@@ -177,6 +177,25 @@ DO NOT USE IN PRODUCTION. PLEASE."""
         },
     }
 
+def create_inline_ad(videoId,vidinf,channelId,channelName,advertText=None):
+    return {
+        "content": {
+            "ad_content": {
+                "video_id": videoId,
+                "channel_icon_url": f"/channel/{channelId}/icon",
+                "channel_name": channelName,
+                "click_tracking_url": "/mobile.handler/dartproxy",
+                "impression_urls": ["/mobile.handler/dartproxy"],
+                "custom_cta_text": advertText,
+                "duration": vidinf.get("duration","00:00"),
+                "thumbnail_info": {
+                    "url": getThumbnail(videoId),
+                },
+                "title": vidinf.get("title",""),
+            }
+        }
+    }
+
 def make_HTMLOnly_AJAX_response(htmlInner,timestamp,signed_in_username=None,signed_in_email=None):
     json_r = {
         "content": {

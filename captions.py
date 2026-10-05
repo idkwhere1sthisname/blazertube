@@ -3,7 +3,6 @@ import tempfile
 from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound, TranscriptsDisabled, IpBlocked, RequestBlocked
 from xml.sax.saxutils import escape
 from pathlib import Path
-from pytubefix import YouTube
 from xml.sax.saxutils import escape
 import traceback
 
@@ -13,9 +12,21 @@ TEMPDIR = Path(tempfile.gettempdir())
 CACHE_DIR = TEMPDIR/"subtitles_cache"
 CACHE_DIR.mkdir(exist_ok=True)
 
+class YouTubeStubClass:
+    def __init__(self):
+        return ""
+    @property
+    def captions():
+        return ""
+
 class Captions:
     def __init__(self):
         self.ytt_api = YouTubeTranscriptApi()
+        try:
+            from pytubefix import YouTube
+        except ImportError:
+            YouTube = YouTubeStubClass()
+        self.YouTube = YouTube
     def getLanguages(self, video_id):
         try:
             transcript_list = self.ytt_api.list(video_id)
@@ -37,7 +48,7 @@ class Captions:
             return {}
     def getLanguages_pytube(self, video_id):
         try:
-            yt = YouTube(f"https://www.youtube.com/watch?v={video_id}")
+            yt = self.YouTube(f"https://www.youtube.com/watch?v={video_id}")
             langs = {}
             captions = yt.captions
             for c in captions:
@@ -75,7 +86,7 @@ class Captions:
             with open(cache_file, "r", encoding="utf-8") as f:
                 return f.read()
         try:
-            yt = YouTube(f"https://www.youtube.com/watch?v={video_id}")
+            yt = self.YouTube(f"https://www.youtube.com/watch?v={video_id}")
             captions = yt.captions[language]
             if captions is None:
                 return Captions.buildEmptyTranscript()

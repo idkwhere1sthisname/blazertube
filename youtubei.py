@@ -14,6 +14,8 @@ import typing as t
 import werkzeug.datastructures as wd
 import traceback
 import colorama
+import base64
+from urllib.parse import quote
 
 from shared import *
 import functions as funcmod
@@ -108,15 +110,17 @@ class GDataAPI:
     def _gdata_get_mostpopular(self,hl="en",gl="US",maxResults=25):
         if not self.GDATA_API_KEY:
             return []
-        try:
-            url = f"{self.GDATA_API_URL}/videos"
-            r = requests.get(url,params={
+        params = {
             "part": "snippet,statistics",
             "chart": "mostPopular",
             "regionCode": gl,
             "maxResults": maxResults,
-            "key": self.GDATA_API_KEY
-        },timeout=20)
+        }
+        params.update(self._build_common_params())
+        headers = self._build_data_api_headers()
+        try:
+            url = f"{self.GDATA_API_URL}/videos"
+            r = requests.get(url,params=params,timeout=20,headers=headers)
             r.raise_for_status()
             data = r.json()
             return data.get("items",[])
@@ -127,14 +131,15 @@ class GDataAPI:
             return {}
         if not channelIds:
             return {}
+        params = {
+            "part": "statistics",
+            "id": ",".join(channelIds),
+        }
+        params.update(self._build_common_params())
+        headers = self._build_data_api_headers()
         try:
             url = f"{self.GDATA_API_URL}/channels"
-            r = requests.get(url,params={
-                "part": "statistics",
-                "id": ",".join(channelIds),
-                "key": self.GDATA_API_KEY},
-                timeout=20
-            )
+            r = requests.get(url,params=params,timeout=20,headers=headers)
             r.raise_for_status()
             data = r.json()
         except (requests.RequestException,ValueError):
@@ -143,11 +148,24 @@ class GDataAPI:
             item["id"]: item.get("statistics",{})
             for item in data.get("items",[])
         }
+    def _build_common_params(self):
+        return {
+            "key": self.GDATA_API_KEY,
+        }
     @staticmethod
-    def yt(url,params=None,timeout=10):
-        r = requests.get(url,params=params,timeout=timeout)
-        r.raise_for_status()
-        return r.json()
+    def _build_data_api_headers(oauth_token=None,isPOST=False):
+        headers = {
+            "User-Agent": "Mozilla/5.0 (compatible; U) gzip",
+            "Accept-Language": "en;q=1.0,en-US;q=1.0,en_US;q=1.0,*;q=0.4",
+            "Accept-Charset": "UTF-8;q=1.0,*;q=0.3",
+            "Accept-Encoding": "gzip;q=1.0,deflate;q=0.9,br;q=0.8,zstd;q=0.9,identity;q=0.5;*;q=0.1",
+            "Save-Data": "on",
+        }
+        if isPOST:
+            headers["Content-Type"] = "application/json"
+        if oauth_token:
+            headers["Authorization"] = f"Bearer {oauth_token}"
+        return headers
     @staticmethod
     def _convert_duration(iso):
         duration = parse_duration(iso)
@@ -181,12 +199,14 @@ class GDataAPI:
         if not self.GDATA_API_KEY:
             return {}
         url = f"{self.GDATA_API_URL}/channels"
+        params = {
+            "part": "statistics",
+            "id": ",".join(channelIds),
+        }
+        params.update(self._build_common_params())
+        headers = self._build_data_api_headers()
         try:
-            r = requests.get(url,params={
-                "part": "statistics",
-                "id": ",".join(channelIds),
-                "key": self.GDATA_API_KEY
-            },timeout=20)
+            r = requests.get(url,params=params,timeout=20,headers=headers)
             r.raise_for_status()
             data = r.json()
         except (requests.RequestException,ValueError):
@@ -198,12 +218,14 @@ class GDataAPI:
         if not channelId:
             return 0
         url = f"{self.GDATA_API_URL}/channels"
+        params = {
+            "part": "statistics",
+            "id": channelId,
+        }
+        params.update(self._build_common_params())
+        headers = self._build_data_api_headers()
         try:
-            r = requests.get(url,params={
-                "part": "statistics",
-                "id": channelId,
-                "key": self.GDATA_API_KEY
-            },timeout=20)
+            r = requests.get(url,params=params,timeout=20,headers=headers)
             r.raise_for_status()
             data = r.json()
         except (requests.RequestException,ValueError):
@@ -215,11 +237,13 @@ class GDataAPI:
     def _get_video_info(self,video_id):
         try:
             url = f"{self.GDATA_API_URL}/videos"
-            r = requests.get(url, params={
+            params = {
                 "part": "snippet,statistics,contentDetails",
                 "id": video_id,
-                "key": self.GDATA_API_KEY,
-            }, timeout=5)
+            }
+            params.update(self._build_common_params())
+            headers = self._build_data_api_headers()
+            r = requests.get(url, params=params, timeout=5, headers=headers)
             items = r.json().get("items", [])
             if not items:
                 return None
@@ -275,17 +299,20 @@ class GDataAPI:
         return channels
     def _get_trending(self, limit=25):
         url = f"{self.GDATA_API_URL}/videos"
-        popular = self.yt(
-            url,
-            {
-                "part": "snippet,contentDetails,statistics",
-                "chart": "mostPopular",
-                "regionCode": "US",
-                "maxResults": limit,
-                "key": self.GDATA_API_KEY,
-            },
-            timeout=5,
-        )
+        headers = self._build_data_api_headers()
+        params = {
+            "part": "snippet,contentDetails,statistics",
+            "chart": "mostPopular",
+            "regionCode": "US",
+            "maxResults": limit,
+        }
+        params.update(self._build_common_params())
+        try:
+            r = requests.get(url,params=params,headers=headers,timeout=5)
+            r.raise_for_status()
+            popular = r.json()
+        except (requests.RequestException,ValueError):
+            return None
         items = [
             self._build_video_item(video, video)
             for video in popular.get("items", [])
@@ -296,10 +323,7 @@ class GDataAPI:
     def _create_playlist_gdataoauthonly(self,title=None,description=None,oauth_token=None,privacyStatus:t.Literal["PRIVATE","UNLISTED","PUBLIC"]="PRIVATE"):
         if not oauth_token or not title or privacyStatus not in ["PRIVATE","UNLISTED","PUBLIC"]:
             return None,400
-        headers = {
-            "Authorization": f"Bearer {oauth_token}",
-            "Content-Type": "application/json",
-        }
+        headers = self._build_data_api_headers(oauth_token=oauth_token,isPOST=True)
         params = {
             "part": "snippet,status",
         }
@@ -327,10 +351,7 @@ class GDataAPI:
     def _add_vid_to_playlist(self,oauth_token,plID,vidID):
         if not oauth_token or not plID or not vidID:
             return None
-        headers = {
-            "Authorization": f"Bearer {oauth_token}",
-            "Content-Type": "application/json",
-        }
+        headers = self._build_data_api_headers(oauth_token=oauth_token,isPOST=True)
         payload = {
             "snippet": {
                 "playlistId": plID,
@@ -356,11 +377,13 @@ class GDataAPI:
             return None
         try:
             url = f"{self.GDATA_API_URL}/channels"
-            r = requests.get(url,params={
+            params = {
                 "part": "snippet,statistics",
                 "id": channelId,
-                "key": self.GDATA_API_KEY
-            },timeout=10)
+            }
+            params.update(self._build_common_params())
+            headers = self._build_data_api_headers()
+            r = requests.get(url,params=params,timeout=10,headers=headers)
             r.raise_for_status()
             data = r.json()
         except (requests.RequestException,ValueError):
@@ -401,13 +424,14 @@ class GDataAPI:
         if not self.GDATA_API_KEY:
             return None
         url = self.GDATA_API_URL+"/i18nLanguages"
+        headers = self._build_data_api_headers()
         params = {
             "part": "snippet",
             "hl": hl,
-            "key": self.GDATA_API_KEY
         }
+        params.update(self._build_common_params())
         try:
-            r = requests.get(url,params=params)
+            r = requests.get(url,params=params,headers=headers)
             r.raise_for_status()
             data = r.json()
         except (requests.RequestException,ValueError):
@@ -427,10 +451,11 @@ class GDataAPI:
         params = {
             "part": "snippet",
             "hl": hl,
-            "key": self.GDATA_API_KEY
         }
+        params.update(self._build_common_params())
+        headers = self._build_data_api_headers()
         try:
-            r = requests.get(url,params=params)
+            r = requests.get(url,params=params,headers=headers)
             r.raise_for_status()
             data = r.json()
         except (requests.RequestException,ValueError):
@@ -444,17 +469,14 @@ class GDataAPI:
             ])
         return regions
     def _get_reportreasons(self,oauth_token,hl="en_US"):
-        if not self.GDATA_API_KEY or not oauth_token:
+        if not oauth_token:
             return None,None
         url = self.GDATA_API_URL+"/videoAbuseReportReasons"
         params = {
-            "key": self.GDATA_API_KEY,
             "part": "snippet,id",
             "hl": hl,
         }
-        headers = {
-            "Authorization": f"Bearer {oauth_token}",
-        }
+        headers = self._build_data_api_headers(oauth_token=oauth_token)
         try:
             r = requests.get(url,params=params,headers=headers)
             r.raise_for_status()
@@ -480,7 +502,7 @@ class GDataAPI:
                 })
         return reasons,secondaryReasons
     def _reportvideo(self,oauth_token,videoId,reasonId,secondaryReasonId=None,comments=None,hl="en_US"):
-        if not self.GDATA_API_KEY or not oauth_token or not reasonId:
+        if not oauth_token or not reasonId:
             return False
         params = {
             "onBehalfOfContentOwner": "false",
@@ -492,10 +514,7 @@ class GDataAPI:
             "comments": comments,
             "language": hl,
         }
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {oauth_token}",
-        }
+        headers = self._build_data_api_headers(oauth_token=oauth_token,isPOST=True)
         url = self.GDATA_API_URL+"/videos/reportAbuse"
         try:
             r = requests.post(url,json=payload,params=params,headers=headers)
@@ -504,21 +523,18 @@ class GDataAPI:
         except requests.RequestException:
             return False
     def _is_token_GDATA_enabled(self,oauth_token:str) -> bool:
-        if not self.GDATA_API_KEY or not oauth_token:
+        if not oauth_token:
             return False
         url = self.GDATA_API_URL+"/subscriptions"
         params = {
             "maxResults": "0",
             "mine": "true",
-            "key": self.GDATA_API_KEY,
         }
-        headers = {
-            "Authorization": f"Bearer {oauth_token}",
-        }
+        headers = self._build_data_api_headers(oauth_token=oauth_token)
         try:
             r = requests.get(url,params=params,headers=headers,timeout=75)
             r.raise_for_status()
-            return (200 <= r.status_code <= 399)
+            return (200 <= r.status_code <= 299)
         except requests.RequestException:
             return False
     # public methods
@@ -544,6 +560,8 @@ class GDataAPI:
         return self._get_i18n_gl(hl=hl)
     def GetLocalizedReportReasonsList(self,oauth_token:str,hl:str|t.Literal["en_US"]="en_US") -> tuple[None, None] | tuple[list, list]:
         return self._get_reportreasons(oauth_token=oauth_token,hl=hl)
+    def CheckCanUsePublicAPI(self,oauth_token:str|t.LiteralString) -> bool:
+        return self._is_token_GDATA_enabled(oauth_token)
     # untested
     def ReportVideo(self,oauth_token:str,videoId:str,reasonId:str,secondaryReasonId:str|None=None,comments:str|None=None,hl:str|None=None) -> bool:
         return self._reportvideo(oauth_token=oauth_token,videoId=videoId,reasonId=reasonId,secondaryReasonId=secondaryReasonId,comments=comments,hl=hl)
@@ -2467,6 +2485,39 @@ class InnerTubeAPI:
                 "thumbnail_info": {"url": thumb},
             }
         }
+    @staticmethod
+    def _get_video_search_params(order="relevance",uploaddt=None,otherfilters=None):
+        opts = bytearray()
+        finalparam = bytearray()
+        dates = {
+            "d": 2, # today
+            "w": 3, # this week
+            "m": 4, # this month
+        }
+        if uploaddt in dates:
+            opts.extend([0x08,dates[uploaddt]])
+        if otherfilters is None:
+            filters = set()
+        else:
+            filters = set(otherfilters)
+        if "long" in filters:
+            opts.extend([0x18,2])
+        if "3d" in filters:
+            opts.extend([0x38,1])
+        ordering = {
+            "relevance": 0,
+            "video_date_uploaded": 1,
+            "video_avg_rating": 2,
+            "video_view_count": 3,
+        }
+        if order in ordering and ordering[order] != 0:
+            finalparam.extend([0x08,ordering[order]])
+        if opts:
+            finalparam.extend([0x12,len(opts)])
+            finalparam.extend(opts)
+        if not finalparam:
+            return SEARCH_VIDEO
+        return quote(base64.b64encode(finalparam).decode("utf-8"))
     def _rawsearch(self,query,params=None,hl="en",gl="US"):
         url = f"{self.INNERTUBE_URL}/search"
         payload = {
@@ -2483,7 +2534,7 @@ class InnerTubeAPI:
             return r.json()
         except requests.RequestException:
             return None
-    def _videosearch(self,query,order="relevance",limit=15,continuation_token=None,hl="en",gl="US"):
+    def _videosearch(self,query,order="relevance",uploaddt=None,otherfilters=None,limit=15,continuation_token=None,hl="en",gl="US",rawparams=None):
         if continuation_token:
             data = self._search_continuation_unauth(continuation_token,hl=hl,gl=gl)
             if not data:
@@ -2491,7 +2542,12 @@ class InnerTubeAPI:
             renderers = self._extract_continuation_renderer(data,"videoRenderer")
             next_tkn = self._extract_continuation_from_continuation(data)
         else:
-            data = self._rawsearch(query,SEARCH_VIDEO,hl=hl,gl=gl)
+            params = SEARCH_VIDEO
+            if rawparams:
+                params = rawparams
+            else:
+                params = self._get_video_search_params(order=order,uploaddt=uploaddt,otherfilters=otherfilters)
+            data = self._rawsearch(query,params,hl=hl,gl=gl)
             if not data:
                 return [],None,None
             renderers = self._searchrenderers(data,"videoRenderer")
@@ -2507,12 +2563,15 @@ class InnerTubeAPI:
             nav = vr.get("ownerText",{}).get("runs",[{}])[0].get("navigationEndpoint",{}).get("browseEndpoint",{})
             ch_id = nav.get("browseId","")
             view_count_text = simpletext(vr.get("viewCountText")) or simpletext(vr.get("shortViewCountText"))
+            duration = self._lengthtext(vr)
+            if rawparams == SEARCH_PARAM_LIVESTREAM: # topic channel fix
+                duration = "LIVE"
             out.append({
                 "video_id": vid_id,
                 "title": title or "",
                 "channel_id": ch_id,
                 "author": owner or "",
-                "duration": self._lengthtext(vr),
+                "duration": duration,
                 "view_count": parsecount(view_count_text),
                 "thumbnail": f"/channel/{ch_id}/icon",
             })
@@ -2529,7 +2588,7 @@ class InnerTubeAPI:
     def _ST_topics_Autos(self,hl="en",gl="US",continuation_token=None):
         return self._videosearch("autos",hl=hl,gl=gl,continuation_token=continuation_token)
     def _ST_topics_Live(self,hl="en",gl="US",continuation_token=None):
-        return self._videosearch("live",hl=hl,gl=gl,continuation_token=continuation_token)
+        return self._videosearch("live",hl=hl,gl=gl,continuation_token=continuation_token,rawparams=SEARCH_PARAM_LIVESTREAM)
     def _ST_topics_TV(self,hl="en",gl="US",continuation_token=None):
         return self._videosearch("TV shows",hl=hl,gl=gl,continuation_token=continuation_token)
     def _ST_topics_Movies(self,hl="en",gl="US",continuation_token=None):
@@ -2846,9 +2905,9 @@ class InnerTubeAPI:
         return self._build_watch_history_feed(oauth_token=oauth_token,hl=hl,gl=gl,continuation_token=continuation_token)
     def MySubscriptions(self,oauth_token:str,maxResults:int=25,hl:str="en",gl:str="US") -> list | None:
         return self._build_subscriptions_page(oauth_token=oauth_token,maxResults=maxResults,hl=hl,gl=gl)
-    def VideoSearch(self,query:str,order:str="relevance",limit:int=15,continuation_token:str|None=None) -> tuple[list, None, None] | tuple[list, t.Any | None, t.LiteralString | None]:
-        return self._videosearch(query=query,order=order,limit=limit,continuation_token=continuation_token)
-    def ChannelSearch(self,query:str,order:str="relevance",limit:int=15,continuation_token:str|None=None) -> tuple[list, None, None] | tuple[list, t.Any | None, t.LiteralString | None]:
+    def VideoSearch(self,query:str,order:t.Literal["relevance","video_view_count","video_date_uploaded","video_avg_rating"]="relevance",uploadfilter:t.Literal["","d","w","m"]|None=None,otherfilters:t.Literal["3d","long"]|list[str]|None=None,limit:int=15,continuation_token:str|None=None) -> tuple[list, None, None] | tuple[list, t.Any | None, t.LiteralString | None]:
+        return self._videosearch(query=query,order=order,uploaddt=uploadfilter,otherfilters=otherfilters,limit=limit,continuation_token=continuation_token)
+    def ChannelSearch(self,query:str,limit:int=15,continuation_token:str|None=None) -> tuple[list, None, None] | tuple[list, t.Any | None, t.LiteralString | None]:
         return self._channelsearch(query=query,limit=limit,continuation_token=continuation_token)
     def PlaylistSearch(self,query:str,limit:int=20,continuation_token:str|None=None) -> t.Any:
         return self._playlistsearch(query=query,limit=limit,continuation_token=continuation_token)

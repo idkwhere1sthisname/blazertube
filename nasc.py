@@ -11,6 +11,7 @@ import os
 from xml.etree import ElementTree as ET
 from werkzeug.serving import WSGIRequestHandler
 from werkzeug.middleware.proxy_fix import ProxyFix
+from datetime import datetime
 import time
 import sys
 import ssl
@@ -38,12 +39,6 @@ def b64encode_val(val: str) -> str:
     return base64.b64encode(val.encode()).decode().replace("=", "*").replace("/","-") # NASC
 
 def make_date():
-    try:
-        from datetime import datetime
-    except ImportError:
-        print("datetime not present")
-        return
-    
     now = datetime.now()
     dt_fmt = now.strftime("%Y%m%d%H%M%S")
     enc = b64encode_val(dt_fmt)

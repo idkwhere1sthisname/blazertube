@@ -11,7 +11,7 @@ import requests
 from werkzeug.serving import WSGIRequestHandler
 from werkzeug.middleware.proxy_fix import ProxyFix
 from xml.etree import ElementTree as ET
-from urllib.parse import urlencode, unquote, quote
+from urllib.parse import urlencode, unquote, quote, quote_plus, unquote_plus
 import ssl
 from functools import wraps
 import sys
@@ -336,9 +336,7 @@ def serve_index():
     shownversion = f"'+new Date().getFullYear()+' BlazerTube ({FMT.upper()})" if not debugmode else DEFAULT_FMT
     html = html.replace("{{FMTVER}}",shownversion)
     ServiceLogin1 = f"{'https' if request.is_secure else 'http'}://{host}/vendor_signin"
-    ServiceLogin2 = f"{'https' if request.is_secure else 'http'}://{host}/vendor_signin"
-    html = html.replace("{{SVCLOGIN1}}",ServiceLogin1)
-    html = html.replace("{{SVCLOGIN2}}",ServiceLogin2)
+    html = html.replace("{{SVCLOGIN1}}",ServiceLogin1,-1)
     if g.SIGNED_IN:
         pfp_final = "/static/images/1.png"
         email_final = ""
@@ -371,14 +369,22 @@ def serve_index():
     html = html.replace("{{gl}}",gl)
     html = html.replace("{{host}}","%s://%s"%("https" if secureserver else "http",request.host),-1)
     html = html.replace("{{host_noprot}}",request.host,-1)
+    countrylistpath = METADIR/"country.json"
+    languagelistpath = METADIR/"language.json"
     langlist = gdata.GetLocalizedLanguagesList(hl=hl)
     countrylist = gdata.GetLocalizedRegionsList(hl=hl)
     languageName = "English"
     localeName = "America"
     if not langlist:
         langlist = [["en","English"]]
+        if languagelistpath.is_file():
+            with open(languagelistpath,"r",encoding="utf-8") as f:
+                langlist = json.load(f)
     if not countrylist:
         countrylist = [["US","America"]]
+        if countrylistpath.is_file():
+            with open(countrylistpath,"r",encoding="utf-8") as f:
+                countrylist = json.load(f)
     languageName = next((n for c,n in langlist if c == hl),hl)
     localeName = next((n for c,n in countrylist if c == gl),gl)
     html = html.replace("{{LOCALENAME}}",localeName)
@@ -388,39 +394,14 @@ def serve_index():
     IS3DS = IS_3DS(ua)
     vendor = "UNKNOWN"
     model = "unk"
-    param_app = "youtube_mobile"
     if IS3DS:
         vendor = "NINTENDO"
         model = "3ds"
-        param_app = "youtube_embedded"
         ISNEW3DS = IS_NEW_3DS(ua)
         if ISNEW3DS:
             model = "new3ds"
     html = html.replace("{{VENDOR}}",vendor)
     html = html.replace("{{MODEL}}",model,-1)
-    loginframeparams = {
-        # we don't even store this stuff
-        "vendor": vendor,
-        "model": model,
-        "cbrver": "7.0.11B554a",
-        "c": "MWEB",
-        "noflv": "1",
-        "cos": model,
-        "cbr": vendor,
-        "cver": "html5",
-        "hl": hl,
-        "gl": gl,
-        "ns": "yt",
-        "app": param_app,
-        "ps": "blazer",
-        "preq": "http://embedded.ctr/launcher.html",
-        "gdata_url": f"{'http' if secureserver else 'https'}://{host}",
-    }
-    if IS3DS:
-        loginframeparams["screenw"] = "320"
-        loginframeparams["screenh"] = "240"
-    ServiceLoginFrame = f"{'https' if request.is_secure else 'http'}://{host}/vendor_signin/frame?" + urlencode(loginframeparams)
-    html = html.replace("{{SVCLOGIN_FRAME}}",ServiceLoginFrame)
     return Response(html,status=200,headers={"Content-Type":"text/html; charset=utf-8"})
 
 def checkifajax(func):
@@ -580,8 +561,6 @@ def redir():
     data = request.args
     ajax = data.get("ajax","0") == "1"
     clear_memory = data.get("clear_local_data","0") == "1"
-    get_flashvars = data.get("action_get_flashvars","0") == "1"
-    versioned_xlb = data.get("action_get_versioned_xlb","0") == "1"
     if clear_memory and ENABLE_CLEAR_MEMORY_BTN:
         if not IS_3DS(request.headers.get("User-Agent","-")):
             return redirect("/")
@@ -1999,15 +1978,15 @@ def nextChannelContinuation():
 @app.route("/results")
 @checkifajax
 def search_results():
-    query = request.args.get("q") or request.args.get("search_query", "")
-    page = request.args.get("p","1")
-    action_corrected = request.args.get("action_corrected","0") == "1"
+    mutableargs = request.args.copy()
+    query = mutableargs.get("q") or mutableargs.get("search_query", "")
+    page = mutableargs.get("p","1")
     try:
         page = int(page)
     except ValueError:
         page = 1
     continuation = None
-    continuation_token = request.args.get("continuation","")
+    continuation_token = mutableargs.get("continuation","")
     next_url = None
     if not query:
         json_r = {
@@ -2023,20 +2002,42 @@ def search_results():
             json_r["signed_in_email"] = g.INFO["email"]
             json_r["signed_in_username"] = g.INFO["name"]
         return json_response(json_r)
-    search_type = request.args.get("search_type", "search_all")
-    search_sort = request.args.get("search_sort", "relevance")
+    mutableargs.pop("preq",None)
+    search_type = mutableargs.get("search_type", "search_all")
+    search_sort = mutableargs.get("search_sort", "relevance")
+    special_filter = mutableargs.get("filters",None) # comma separated list (3d, long)
+    uploadfilter = mutableargs.get("uploaded","")
+    search_types = ["search_all","search_channel","search_playlist"]
+    search_sorts = ["relevance","video_view_count","video_date_uploaded","video_avg_rating"]
+    uploadfilters = ["",None,"d","w","m"] # not specified, today, this week, this month
+    special_filters = [None,"3d","long"]
+    if search_type not in search_types:
+        search_type = "search_all"
+    if search_sort not in search_sorts:
+        search_sort = "relevance"
+    if uploadfilter not in uploadfilters:
+        uploadfilter = ""
+        mutableargs.pop("uploaded",None)
+    if special_filter:
+        other_filter = [f.strip() for f in special_filter.split(",")]
+        if not all(f in special_filters for f in other_filter):
+            special_filter = None
+            mutableargs.pop("filters",None)
+        else:
+            special_filter = other_filter
     correction = None
     results = []
-    def did_you_mean_item(originalQuery,newquery):
+    def did_you_mean_item(originalQuery,newquery,escape_hatch=False):
         display_query = escape(newquery)
-        urlquery = quote(newquery,safe="")
+        urlquery = quote_plus(newquery,safe="")
         searchcorrectionhtml = render_template("components/search_correction.html",urlquery=urlquery,display_query=display_query)
-        return {
+        ajaxresp = {
             "corrected_query": newquery,
             "original_query": originalQuery,
             "corrected_html": searchcorrectionhtml,
-            "from_escape_hatch": False,
+            "from_escape_hatch": escape_hatch,
         }
+        return ajaxresp
     def video_item(v):
         author = v["author"]
         ch_id = v["channel_id"]
@@ -2112,7 +2113,7 @@ def search_results():
                 results.append(playlist_item(p))
         else: # search_all
             seen = set()
-            videos,continuation,correction = innertube.VideoSearch(query,order=search_sort,limit=15,continuation_token=continuation_token)
+            videos,continuation,correction = innertube.VideoSearch(query,order=search_sort,uploadfilter=uploadfilter,otherfilters=special_filter,limit=15,continuation_token=continuation_token)
             if not continuation_token:
                 channels,_,_ = innertube.ChannelSearch(query,limit=3)
                 video_count = gdata.GetVideoCountBatch([c["channel_id"] for c in channels])
@@ -3015,6 +3016,8 @@ def flagvideo():
 
 @app.route("/complete/search")
 def completesearch():
+    if IS_3DS(request.headers.get("User-Agent","-")):
+        return Response(status=204)
     data = request.args
     query = data.get("q","")
     lang = data.get("hl","en")
