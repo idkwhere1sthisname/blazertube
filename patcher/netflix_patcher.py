@@ -23,16 +23,12 @@ Known endpoints:
 - npticketprovision
 Nonetheless, this patcher simply creates a patched binary with different URLs.
 The application only released in America
-
-UPDATE 22/08/2026 (dd.mm.yyyy): WE GOT PAST PING ON THE NETFLIX WII DISK!!!
-IT IS NOW STUCK AT REGISTER (after ecclinkprovision and preregister).
-Not much on 3DS Netflix unfortunately.
 """
 from __future__ import print_function, with_statement, absolute_import
-import ips
 from pathlib import Path
 import sys
 import shutil
+import ips
 
 from lib.patcher_shared import *
 
@@ -65,6 +61,14 @@ if port == 80 or port == 443:
     host = f"{host}"
 else:
     host = f"{host}:{port}/"
+isIps = None
+while isIps is None:
+    ipsIn = input("Should the output be an IPS file instead of a binary (\"y\" is recommended)? (Y/N): ").lower().strip()
+    if ipsIn not in ["y","n"]:
+        print("Invalid input, please enter either Y or N")
+    else:
+        isIps = ipsIn == "y"
+        break
 binpath = base/"bin"/"netflix"/"USAOnly.bin"
 if not binpath.is_file():
     print("Base binary not found.\nPlease redownload it.")
@@ -183,8 +187,8 @@ print(f"CDN Urls patched: {cdnURLSret+cdnURLSCANret} (USA: {cdnURLSret}, Canada:
 print(f"Miscellanous patched applied: {otherPatchesret}")
 print(f"Overall: {mainpatchret+httpOnlypatchesret+cdnURLSret+cdnURLSCANret+otherPatchesret}")
 
-os.makedirs("temp",exist_ok=True)
 tempdir = base/"temp"
+tempdir.mkdir(exist_ok=True)
 bintemp = tempdir/"tmpbin"
 with open(bintemp,"wb") as f:
     f.write(bincontents)
@@ -194,11 +198,22 @@ patchpath = base/"patch"
 finalpath = patchpath/"luma"/"titles"/f"{titleId:016X}"
 localepath = finalpath/"locale.txt"
 finalbin = finalpath/"code.bin"
-os.makedirs(finalpath,exist_ok=True)
+finalips = finalpath/"code.ips"
+finalpath.mkdir(exist_ok=True)
 
 shutil.move(bintemp,finalbin)
-with open(localepath,"w") as f:
-    f.write(localeContents)
+
+if not localepath.is_file():
+    with open(localepath,"w") as f:
+        f.write(localeContents)
+
+if isIps:
+    print("Writing IPS...")
+    with open(str(finalbin),"rb") as patchedbin, open(str(binpath),"rb") as originalbin:
+        p = ips.Patch.create(originalbin,patchedbin)
+    with open(finalips,"wb") as f:
+        f.write(bytes(p))
+    finalbin.unlink()
 
 if tempdir.is_dir():
     shutil.rmtree(tempdir,onerror=fixreadonly)

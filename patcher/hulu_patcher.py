@@ -42,6 +42,14 @@ while regionchoice is None:
         regionchoice = regionchoice_test
     except ValueError:
         print("Please enter a valid choice.")
+isIps = None
+while isIps is None:
+    ipsIn = input("Should the output be an IPS file instead of a binary (\"y\" is recommended)? (Y/N): ").lower().strip()
+    if ipsIn not in ["y","n"]:
+        print("Invalid input, please enter either Y or N")
+    else:
+        isIps = ipsIn == "y"
+        break
 print("Patching...")
 regionchoice = int(regionchoice_test)
 # constants
@@ -100,6 +108,7 @@ if not binpatchpath.is_file():
     print("Patched binary not found, please re-run the patcher.")
     sys.exit()
 FINAL = base/patchpath/"code.bin"
+FINAL_IPS = base/patchpath/"code.ips"
 shutil.move(binpatchpath,FINAL)
 
 try:
@@ -110,7 +119,17 @@ try:
             localepath.unlink()
         else:
             f.write(localeContents.get(regionchoice,None))
-except FileExistsError: pass
+except FileExistsError:
+    pass
+
+if isIps:
+    print("Writing IPS...")
+    with open(str(FINAL),"rb") as patchedbin, open(str(binpath),"rb") as originalbin:
+        p = ips.Patch.create(originalbin,patchedbin)
+    with open(FINAL_IPS,"wb") as f:
+        f.write(bytes(p))
+    FINAL.unlink()
+
 
 print("Done!")
 print("Be sure to enable Game Patching in Luma3DS's settings.")
