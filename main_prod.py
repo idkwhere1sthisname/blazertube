@@ -18,6 +18,13 @@ from shared import *
 from video import GetVideo
 from youtubei import InnerTubeAPI
 
+from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_ipban import IpBan
+from flask_compress import Compress
+from werkzeug.serving import WSGIRequestHandler
+
 logging.Formatter.converter = time.gmtime
 logging.basicConfig(
     level=logging.WARNING,
@@ -26,6 +33,11 @@ logging.basicConfig(
 )
 
 innertube    = InnerTubeAPI(INNERTUBE_KEY)
+BASE         = Path(__file__).resolve().parent
+METADIR      = BASE/"meta"
+
+allowedfile = METADIR/"allowed.yml"
+nuisancesfile = METADIR/"nuisances.yml"
 
 # defaults
 port         = 80
@@ -113,6 +125,51 @@ def loadcfg():
             netflix_port = int(netflix_port)
     except (ValueError,TypeError):
         netflix_port= -1
+
+# these functions are required for the gunicorn script
+def YouTube():
+    yt_prodapp.wsgi_app = ProxyFix(yt_prodapp.wsgi_app,x_for=1,x_proto=1,x_host=1,x_port=1)
+    limiter = Limiter(app=yt_prodapp,key_func=get_remote_address,default_limits=["100 per minute"],storage_uri="memory://")
+    ipban = IpBan(yt_prodapp,ban_seconds=86400)
+    yt_prodapp.secret_key = FLASK_SECRET_KEY
+    if not yt_prodapp.secret_key:
+        thistmpkey = secrets.token_hex(32)
+        print(f"{Fore.RED}[err]{Fore.RESET} No Flask secret key has been configured")
+        print(f"{Fore.BLUE}[info]{Fore.RESET} Open your environment (.env) file and add:")
+        print(f"FLASK_SECRET_KEY={thistmpkey}",flush=True)
+        sys.exit(-1)
+    ipban.load_nuisances(nuisancesfile if nuisancesfile.is_file() else None)
+    ipban.load_allowed(allowedfile if allowedfile.is_file() else None)
+    WSGIRequestHandler.protocol_version = "HTTP/1.1"
+    return yt_prodapp
+def YouTubeMaintenance():
+    yt_maintapp.wsgi_app = ProxyFix(yt_maintapp.wsgi_app,x_for=1,x_proto=1,x_host=1,x_port=1)
+    limiter = Limiter(app=yt_maintapp,key_func=get_remote_address,default_limits=["100 per minute"],storage_uri="memory://")
+    ipban = IpBan(yt_maintapp,ban_seconds=86400)
+    compress = Compress(yt_maintapp)
+    huluapp.config["COMPRESS_REGISTER"] = True
+    huluapp.config["COMPRESS_STREAMS"] = False
+    WSGIRequestHandler.protocol_version = "HTTP/1.1"
+    return yt_maintapp
+def HuluPlus():
+    huluapp.wsgi_app = ProxyFix(huluapp.wsgi_app,x_for=1,x_proto=1,x_host=1,x_port=1)
+    limiter = Limiter(app=huluapp,key_func=get_remote_address,default_limits=["100 per minute"],storage_uri="memory://")
+    ipban = IpBan(huluapp,ban_seconds=86400)
+    compress = Compress(huluapp)
+    ipban.load_allowed(allowedfile if allowedfile.is_file() else None)
+    ipban.load_nuisances(nuisancesfile if nuisancesfile.is_file() else None)
+    huluapp.config["COMPRESS_REGISTER"] = True
+    huluapp.config["COMPRESS_STREAMS"] = False
+    WSGIRequestHandler.protocol_version = "HTTP/1.1"
+    return huluapp
+def Netflix():
+    netflixapp.wsgi_app = ProxyFix(netflixapp.wsgi_app,x_for=1,x_proto=1,x_host=1,x_port=1)
+    limiter = Limiter(app=netflixapp,key_func=get_remote_address,default_limits=["100 per minute"],storage_uri="memory://")
+    ipban = IpBan(netflixapp,ban_seconds=86400)
+    ipban.load_allowed(allowedfile if allowedfile.is_file() else None)
+    ipban.load_nuisances(nuisancesfile if nuisancesfile.is_file() else None)
+    WSGIRequestHandler.protocol_version = "HTTP/1.1"
+    return huluapp
 
 if __name__ == "__main__":
     try:

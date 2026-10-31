@@ -121,8 +121,22 @@ FLASK_SECRET_KEY=[...]
 > [!IMPORTANT]
 > You must run the development server of the app you want to run at least once before running the production server
 
+### For Windows systems
+
 1. **Run `main.py` to create a basic configuration file first** (if you haven't already done so)
 2. When prompted, do not enable debug mode
     - If you already ran the main Python server, open `config.xml` and be sure to have set `debugging` to `false`
 3. Run `main.prod.py`, then follow the instructions there
 4. Optionally use another server software as a reverse proxy (e.g. [Nginx](https://nginx.org/))
+
+### For Linux systems
+
+> [!IMPORTANT]
+> You can also run a production server via the script (using waitress), but it is not recommended over gunicorn
+
+1. Install gunicorn:
+    - `pip install gunicorn`
+2. Move or copy the production scripts from `scripts` to the root
+    - `mv scripts/* .` (move)
+    - `cp scripts/* .` (copy)
+3. Run the shell script of the server you want to run

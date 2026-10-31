@@ -158,6 +158,19 @@ def set_version_subpath(subpath):
 def set_versioned_xlb_subpath(subpath):
     global XLB_URL
     XLB_URL = "%s://%s:%s/%s"%(EXT_API_PROT,EXT_API_HOST,EXT_API_PORT,subpath)
+def getPort():
+    if not config.is_file():
+        return "80"
+    parser = ET.XMLParser(target=PARSER_KEEP_COMMENTS())
+    root = ET.parse(config,parser=parser).getroot()
+    def safeget(name,default=None):
+        elem = root.find(f"cfg:{name}",CFG_NAMESPACE)
+        return elem.text if elem is not None else default
+    try:
+        port = int(safeget("yt_port","80"))
+    except (Exception,ValueError,TypeError):
+        port = 80
+    return str(port)
 
 def loadcfg():
     global host,port,debugmode,secureserver,keypath,pempath,config,cfgexist,maint,huluhost,huluport,cookiesvalid,cookiesexist
@@ -307,7 +320,7 @@ def json_response(data):
     )
 
 def serve_index():
-    host = request.host
+    port = getPort()
     headers = request.headers
     cookies = request.cookies
     index = str(TEMPLATES_DIR/"index.html")
@@ -335,7 +348,7 @@ def serve_index():
     gl = g.GL or cookies.get("gl") or "US"
     shownversion = f"'+new Date().getFullYear()+' BlazerTube ({FMT.upper()})" if not debugmode else DEFAULT_FMT
     html = html.replace("{{FMTVER}}",shownversion)
-    ServiceLogin1 = f"{'https' if request.is_secure else 'http'}://{host}/vendor_signin"
+    ServiceLogin1 = f"/vendor_signin"
     html = html.replace("{{SVCLOGIN1}}",ServiceLogin1,-1)
     if g.SIGNED_IN:
         pfp_final = "/static/images/1.png"
@@ -367,8 +380,8 @@ def serve_index():
     html = html.replace("{{BUILD_SIGNATURE}}",BUILD_SIG)
     html = html.replace("{{hl}}",hl)
     html = html.replace("{{gl}}",gl)
-    html = html.replace("{{host}}","%s://%s"%("https" if secureserver else "http",request.host),-1)
-    html = html.replace("{{host_noprot}}",request.host,-1)
+    html = html.replace("{{host}}","%s://%s%s"%("https" if secureserver else "http",request.host,f":{port}" if port not in ["80","443"] else ""),-1)
+    html = html.replace("{{host_noprot}}","%s%s"%(request.host,f":{port}" if port not in ["80","443"] else ""),-1)
     countrylistpath = METADIR/"country.json"
     languagelistpath = METADIR/"language.json"
     langlist = gdata.GetLocalizedLanguagesList(hl=hl)
