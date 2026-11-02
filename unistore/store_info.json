@@ -1,0 +1,13 @@
+{
+    "title": "BlazerTube Unistore",
+    "author": "idkwh, nebulagamez",
+    "description": "Revival of 3DS applications",
+    "file": "bt-unistore.unistore",
+    "sheet": "blazertube-unistore.t3x",
+    "url": "http://unistore.3ds.idkwh.ct8.pl/my/store.unistore",
+    "sheetURL": "http://unistore.3ds.idkwh.ct8.pl/my/tex/texsheet.t3x",
+    "bg_index": 1,
+    "bg_sheet": 0,
+    "revision": 20,
+    "version": 3
+}

@@ -23,7 +23,7 @@ A (Work in Progress) Native YouTube 3DS app Revival
 
 ### Manual install
 
-Instructions are available [here](https://drive.google.com/drive/folders/1LzL-bQ5w_wqftXQo9PqupN4Zr16YdcoM), in the `README` file
+Instructions are available [here](patches/README.md).
 
 ### UniStore install (recommended)
 
@@ -39,8 +39,8 @@ See [this guide](/self_host_guide.md) to learn how self host your own instance, 
 
 ## Working features
 
-- Playing short videos (unless using a New 3DS)
-    - Videos can be toggled between 144p and 240p on Old 3DS consoles, otherwise they're locked to 360p on New 3DS consoles
+- Playing short videos
+    - Videos can be toggled between 144p and 240p on 3DS consoles by pressing the "HQ" button, while on everything else, they're locked to 360p
 - Sign in (doesn't work with multiple accounts)
     - Includes (dis)liking videos, (un)subscribing from channels, adding/removing from playlists, Watch Later, Liked Videos, video recommendations, viewing uploaded videos, etc...
 - Pairing with TV/Console
@@ -69,11 +69,6 @@ See [this guide](/self_host_guide.md) to learn how self host your own instance, 
 - Adding inbox and social if possible
 - Adding videos to watch history when watched
 - Reporting videos in app
-
-## FAQ
-
-- Videos don't play / play with lag (o3DS) on the public instance
-    - This is a known bug, and it will be fixed eventually
 
 ## Support
 
