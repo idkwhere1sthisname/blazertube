@@ -7,7 +7,9 @@ Select your YouTube app's region and then download its respective code.ips (usua
 You must place the code.ips file in different folders depending on the app's region:
 
 Europe: `/luma/titles/00040000000CCD00/`
+
 USA: `/luma/titles/00040000000B0F00/`
+
 Japan: `/luma/titles/00040000000D3000/`
 
 If the folder of the region you're trying to use doesn't exist, simply create the directory and place code.ips there.

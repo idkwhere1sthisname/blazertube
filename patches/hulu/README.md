@@ -10,6 +10,7 @@ Select your app's region and then download its respective code.ips (usually it's
 You must place the code.ips file in different folders depending on the app's region:
 
 USA: `/luma/titles/0004000000081700/`
+
 Japan: `/luma/titles/00040000000FC400/`
 
 If the folder of the region you're trying to use doesn't exist, simply create the directory and place code.ips there.
