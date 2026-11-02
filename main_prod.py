@@ -140,6 +140,9 @@ def YouTube():
         sys.exit(-1)
     ipban.load_nuisances(nuisancesfile if nuisancesfile.is_file() else None)
     ipban.load_allowed(allowedfile if allowedfile.is_file() else None)
+    set_external_API_url("https","lbl-api.idkwh.ct8.pl","443")
+    set_version_subpath("api/ctr/GetVersion.php")
+    set_versioned_xlb_subpath("api/ctr/GetVersionedXLB.php")
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
     return yt_prodapp
 def YouTubeMaintenance():
@@ -149,6 +152,9 @@ def YouTubeMaintenance():
     compress = Compress(yt_maintapp)
     huluapp.config["COMPRESS_REGISTER"] = True
     huluapp.config["COMPRESS_STREAMS"] = False
+    set_external_API_url("https","lbl-api.idkwh.ct8.pl","443")
+    set_version_subpath("api/ctr/GetVersion.php")
+    set_versioned_xlb_subpath("api/ctr/GetVersionedXLB.php")
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
     return yt_maintapp
 def HuluPlus():
