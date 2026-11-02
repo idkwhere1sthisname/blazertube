@@ -5,7 +5,7 @@
         "description": "Revival of 3DS applications",
         "file": "bt-unistore.unistore",
         "sheetURL": "http://unistore.3ds.idkwh.ct8.pl/my/tex/texsheet.t3x",
-        "infoURL": "http://unistore.3ds.idkwh.ct8.pl/my/info.json",
+        "infoURL": "http://unistore.3ds.idkwh.ct8.pl/my/store_info.json",
         "url": "http://unistore.3ds.idkwh.ct8.pl/my/store.unistore",
         "sheet": "blazertube-unistore.t3x",
         "bg_index": 1,
