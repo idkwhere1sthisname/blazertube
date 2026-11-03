@@ -11,7 +11,14 @@ from xml.etree import ElementTree as ET
 import stat
 import uuid
 import colorama
+from contextlib import contextmanager
 import typing as t
+import os
+
+if os.name != "nt":
+    import fcntl
+else:
+    import msvcrt
 
 from shared import PARSER_KEEP_COMMENTS, CFG_NAMESPACE
 
@@ -20,6 +27,30 @@ config = base/"config.xml"
 colorama.init(True)
 Fore = colorama.Fore
 Back = colorama.Back
+
+@contextmanager
+def VideoLock(vidCache:Path,videoId:str):
+    lkdir = vidCache/"lk"
+    lkdir.mkdir(parents=True,exist_ok=True)
+    lkpath = lkdir/f"bt3ds_{videoId}.lck"
+    with open(lkpath,"a+b") as f:
+        if os.name != "nt":
+            fcntl.flock(f.fileno(),fcntl.LOCK_EX)
+        else:
+            f.seek(0x00,os.SEEK_END)
+            if f.tell() == 0:
+                f.write(b"\x00")
+                f.flush()
+            f.seek(0x00)
+            msvcrt.locking(f.fileno(),msvcrt.LK_LOCK,1)
+        try:
+            yield
+        finally:
+            if os.name != "nt":
+                fcntl.flock(f.fileno(),fcntl.LOCK_UN)
+            else:
+                f.seek(0x00)
+                msvcrt.locking(f.fileno(),msvcrt.LK_UNLCK,1)
 
 class GetVideo:
     def __init__(self) -> None:
@@ -30,7 +61,7 @@ class GetVideo:
     def createviddir(self) -> None:
         fmtdir = str(self.videocache).replace("\\","/")
         if not self.videocache.is_dir():
-            self.videocache.mkdir(mode=511,parents=True,exist_ok=True)
+            self.videocache.mkdir(parents=True,exist_ok=True)
             if self.debugmode:
                 print(f"{Fore.GREEN}[vidcache]{Fore.RESET} video cache directory created (path: {fmtdir})")
             else:
@@ -149,12 +180,16 @@ class GetVideo:
                         print(f"{Fore.RED}[stream]{Fore.RESET} every client failed. The video might be unavailable.\n{e}")
         return None
     def getVideoOrientation(self, source: Path | str) -> t.Literal["standard", "vertical"]:
-        probe_cmd = ['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=width,height','-of','json',source]
+        probe_cmd = ['ffprobe','-hide_banner','-v','error','-select_streams','v:0','-show_entries','stream=width,height','-of','json',str(source)]
         try:
-            result = subprocess.run(probe_cmd,capture_output=True,text=True,timeout=45)
+            result = subprocess.run(probe_cmd,capture_output=True,text=True,timeout=50)
         except subprocess.TimeoutExpired:
             if self.debugmode:
-                print(f"{Fore.RED}[orientation]{Fore.RED} ffprobe timeout expired")
+                print(f"{Fore.RED}[orientation]{Fore.RESET} ffprobe timeout expired")
+            return "standard"
+        except FileNotFoundError:
+            if self.debugmode:
+                print(f"{Fore.RED}[orientation]{Fore.RESET} ffprobe is not available or installed")
             return "standard"
         if result.returncode != 0:
             if self.debugmode:
@@ -181,7 +216,7 @@ class GetVideo:
             print(f"{Fore.BLUE}[orientation]{Fore.RESET} got {width}x{height}")
         return "vertical" if height > width else "standard"
     @staticmethod
-    def getScale(orientation: t.Literal["tiny","small"], quality: str) -> t.Literal["scale=-2:240", "scale=256:240", "scale=-2:144", "scale=160:144"]:
+    def getScale(orientation: t.Literal["vertical","standard"], quality: t.Literal["tiny","small"]) -> t.Literal["scale=-2:240", "scale=256:240", "scale=-2:144", "scale=160:144"]:
         if quality == "small":
             return "scale=-2:240" if orientation == "vertical" else "scale=256:240"
         return "scale=-2:144" if orientation == "vertical" else "scale=160:144"
@@ -220,159 +255,177 @@ class GetVideo:
             return Response("Error fetching video stream", status=500)
         return redirect(stream_url)
     def fetchAndLoadStreamOnly_DLEncode(self, lang:str, country:str, videoId:str, quality:t.Literal["tiny","small"]="tiny") -> Response:
-        self.cleanup()
+        if quality not in ["tiny","small"]:
+            return Response("Invalid quality",status=400)
         smallpath = self.videocache/f"bt3ds_{videoId}_small.mp4" # 240p
         tinypath = self.videocache/f"bt3ds_{videoId}_tiny.mp4" # 144p
-        stderr = stdout = subprocess.DEVNULL
+        targetpath = tinypath if quality == "tiny" else smallpath
+        stderr = subprocess.PIPE
+        stdout = subprocess.DEVNULL
         if self.debugmode:
-            stderr = stdout = subprocess.PIPE
-        if quality == "tiny" and tinypath.exists():
-            if self.debugmode:
-                print(f"{Fore.BLUE}[dl+encode]{Fore.RESET} 144p (tiny) video for id {videoId} is cached, returning that instead...")
-            return self.sendFileRange(str(tinypath), mime="video/mp4")
-        if quality == "small" and smallpath.exists():
-            if self.debugmode:
-                print(f"{Fore.BLUE}[dl+encode]{Fore.RESET} 240p (small) video for id {videoId} is cached, returning that instead...")
-            return self.sendFileRange(str(smallpath), mime="video/mp4")
-        # strings from ExeFS/HTML (forgot honestly):
-        # video/mp4; codecs="avc1.42E01E, mp4a.40.2"
-        # video/webm; codecs="vp9, opus"
-        # video/webm; codecs="vp8, vorbis"
-        # audio/webm; codecs="opus"
-        # audio/mp4; codecs="mp4a.40.2"
-        # video/mp4; codecs="avc1.42E01E, mp4a.40.2"
-        if quality == "tiny" and smallpath.exists():
-            tmpout = self.videocache/f"bt3ds_{videoId}_tiny.{uuid.uuid4().hex}.tmp.mp4"
-            orientation = self.getVideoOrientation(smallpath)
-            scale = self.getScale(orientation,"tiny")
-            cmd = [
-                "ffmpeg",
-                "-y",
-                "-i", str(smallpath),
-                "-vf", scale,
-                "-c:v", "libx264",
-                "-profile:v", "baseline",
-                "-level:v", "3.0",
-                "-preset", "veryfast",
-                "-b:v", "120k",
-                "-pix_fmt", "yuv420p",
-                "-c:a", "copy",
-                "-movflags", "+faststart",
-                "-g", "30",
-                str(tmpout),
-            ]
-            proc = subprocess.run(
-                cmd,
-                stdout=stdout,
-                stderr=stderr,
-                text=True
-            )
-            if self.debugmode:
-                print(f"{Fore.YELLOW}[ffmpeg]{Fore.RESET} stdout: {proc.stdout}")
-                print(f"{Fore.YELLOW}[ffmpeg]{Fore.RESET} stderr: {proc.stderr}")
-                print(f"{Fore.BLUE}[dl+encode]{Fore.RESET} Encoding tiny video...")
-            if proc.returncode != 0:
-                print(f"{Fore.RED}[dl+encode]{Fore.RESET} error encoding small video (144p) (see above for stderr)")
-                if tmpout.exists():
+            stdout = subprocess.PIPE
+        with VideoLock(self.videocache,videoId):
+            self.cleanup()
+            if not targetpath.exists():
+                # 144p video exists and 240p doesn't
+                if quality == "tiny" and smallpath.exists():
+                    if self.debugmode:
+                        print(f"{Fore.BLUE}[dl+encode]{Fore.RESET} Encoding small (240p) video...")
+                    tmpout = self.videocache/f"bt3ds_{videoId}_tiny.{uuid.uuid4().hex}.tmp.mp4"
+                    orientation = self.getVideoOrientation(smallpath)
+                    scale = self.getScale(orientation,"tiny")
+                    cmd = [
+                        "ffmpeg",
+                        "-y",
+                        "-nostdin",
+                        "-hide_banner",
+                        "-i", str(smallpath),
+                        "-vf", scale,
+                        "-c:v", "libx264",
+                        "-profile:v", "baseline",
+                        "-level:v", "3.0",
+                        "-preset", "veryfast",
+                        "-b:v", "120k",
+                        "-pix_fmt", "yuv420p",
+                        "-c:a", "copy",
+                        "-movflags", "+faststart",
+                        "-g", "30",
+                        str(tmpout),
+                    ]
                     try:
-                        tmpout.unlink()
-                    except OSError:
-                        self.fixreadonly(tmpout)
-                return Response("error encoding 144p (TINY) video", status=500)
-            tmpout.replace(tinypath)
-            if self.debugmode:
-                print(f"{Fore.BLUE}[dl+encode]{Fore.RESET} Done! Returning Range and video...")
-            return self.sendFileRange(str(tinypath),mime="video/mp4")
-        stream_url = self.fetchStream(lang,country,videoId,new3DS=False)
-        if not stream_url:
-            return Response("Error fetching video stream", status=500)
-        orientation = self.getVideoOrientation(stream_url)
-        scale = self.getScale(orientation,"small")
-        tmp_small = self.videocache/f"bt3ds_{videoId}_small.{uuid.uuid4().hex}.tmp.mp4"
-        # "master" command
-        cmd = [
-            "ffmpeg",
-            "-y",
-            "-i", stream_url,
-            "-c:v", "libx264",
-            "-vf", scale,
-            "-profile:v", "baseline",
-            "-level:v", "3.0",
-            "-preset", "veryfast",
-            "-b:v", "200k",
-            "-pix_fmt", "yuv420p",
-            "-c:a", "aac",
-            "-b:a", "96k",
-            "-movflags", "+faststart",
-            "-g", "30",
-            str(tmp_small),
-        ]
-        proc = subprocess.run(
-            cmd,
-            stdout=stdout,
-            stderr=stderr,
-            text=True
-        )
-        if self.debugmode:
-            print(f"{Fore.YELLOW}[ffmpeg]{Fore.RESET} stdout: {proc.stdout}")
-            print(f"{Fore.YELLOW}[ffmpeg]{Fore.RESET} stderr: {proc.stderr}")
-            print(f"{Fore.BLUE}[dl+encode]{Fore.RESET} Encoding small video...")
-        if proc.returncode != 0:
-            if self.debugmode:
-                print(f"{Fore.RED}[dl+encode]{Fore.RESET} error encoding small video (240p) (see above for stderr)")
-            if tmp_small.exists():
-                try:
-                    tmp_small.unlink()
-                except OSError:
-                    self.fixreadonly(tmp_small)
-            return Response("Error encoding SMALL (240p) video", status=500)
-        tmp_small.replace(smallpath)
-        if quality == "small":
-            if self.debugmode:
-                print(f"{Fore.BLUE}[dl+encode]{Fore.RESET} Done! returning Range...")
-            return self.sendFileRange(str(smallpath),mime="video/mp4")
-        tmp_tiny = self.videocache/f"bt3ds_{videoId}_tiny.{uuid.uuid4().hex}.tmp.mp4"
-        orientation = self.getVideoOrientation(smallpath)
-        scale = self.getScale(orientation,"tiny")
-        cmd = [
-            "ffmpeg",
-            "-y",
-            "-i", str(smallpath),
-            "-vf", scale,
-            "-c:v", "libx264",
-            "-profile:v", "baseline",
-            "-level:v", "3.0",
-            "-preset", "veryfast",
-            "-b:v", "120k",
-            "-pix_fmt", "yuv420p",
-            "-c:a", "copy",
-            "-movflags", "+faststart",
-            "-g", "30",
-            str(tmp_tiny),
-        ]
-        proc = subprocess.run(
-            cmd,
-            stdout=stdout,
-            stderr=stderr,
-            text=True
-        )
-        if self.debugmode:
-            print(f"{Fore.YELLOW}[ffmpeg]{Fore.RESET} stdout: {proc.stdout}")
-            print(f"{Fore.YELLOW}[ffmpeg]{Fore.RESET} stderr: {proc.stderr}")
-            print(f"{Fore.BLUE}[dl+encode]{Fore.RESET} Encoding tiny video...")
-        if proc.returncode != 0:
-            if self.debugmode:
-                print(f"{Fore.RED}[dl+encode]{Fore.RESET} error encoding tiny (144p) video (see above for stderr)")
-            if tmp_tiny.exists():
-                try:
-                    tmp_tiny.unlink()
-                except OSError:
-                    self.fixreadonly(tmp_tiny)
-            return Response("Error encoding TINY (144p) video", status=500)
-        tmp_tiny.replace(tinypath)
-        if self.debugmode:
+                        proc = subprocess.run(
+                            cmd,
+                            stdout=stdout,
+                            stderr=stderr,
+                            text=True,
+                            timeout=240
+                        )
+                        if self.debugmode:
+                            print(f"{Fore.YELLOW}[ffmpeg]{Fore.RESET} stdout: {proc.stdout}")
+                        if proc.returncode != 0:
+                            if self.debugmode:
+                                print(f"{Fore.YELLOW}[ffmpeg]{Fore.RESET} stderr: {proc.stderr}")
+                                print(f"{Fore.RED}[dl+encode]{Fore.RESET} error encoding tiny video (144p) (see above for stderr)")
+                            return Response("Error encoding TINY (144p) video",status=500)
+                        tmpout.replace(tinypath)
+                    except subprocess.TimeoutExpired:
+                        print(f"{Fore.RED}[ffmpeg]{Fore.RESET} timed out while encoding tiny video (144p)")
+                        return Response("error encoding TINY (144p) video",status=500)
+                    finally:
+                        if tmpout.exists():
+                            try:
+                                tmpout.unlink()
+                            except OSError:
+                                self.fixreadonly(tmpout)
+                else:
+                    # fetch video, dl and encode (see function name)
+                    if self.debugmode:
+                        print(f"{Fore.BLUE}[dl+encode]{Fore.RESET} Fetching and encoding small video...")
+                    stream_url = self.fetchStream(lang,country,videoId,new3DS=False)
+                    if not stream_url:
+                        return Response("Error fetching video stream", status=500)
+                    orientation = self.getVideoOrientation(stream_url)
+                    scale = self.getScale(orientation,"small")
+                    tmp_small = self.videocache/f"bt3ds_{videoId}_small.{uuid.uuid4().hex}.tmp.mp4"
+                    cmd = [
+                        "ffmpeg",
+                        "-y",
+                        "-nostdin",
+                        "-hide_banner",
+                        "-i", stream_url,
+                        "-c:v", "libx264",
+                        "-vf", scale,
+                        "-profile:v", "baseline",
+                        "-level:v", "3.0",
+                        "-preset", "veryfast",
+                        "-b:v", "200k",
+                        "-pix_fmt", "yuv420p",
+                        "-c:a", "aac",
+                        "-b:a", "96k",
+                        "-movflags", "+faststart",
+                        "-g", "30",
+                        str(tmp_small),
+                    ]
+                    try:
+                        proc = subprocess.run(
+                            cmd,
+                            stdout=stdout,
+                            stderr=stderr,
+                            text=True,
+                            timeout=240
+                        )
+                        if self.debugmode:
+                            print(f"{Fore.YELLOW}[ffmpeg]{Fore.RESET} stdout: {proc.stdout}")
+                        if proc.returncode != 0:
+                            if self.debugmode:
+                                print(f"{Fore.YELLOW}[ffmpeg]{Fore.RESET} stderr: {proc.stderr}")
+                                print(f"{Fore.RED}[dl+encode]{Fore.RESET} error encoding small video (240p) (see above for stderr)")
+                            return Response("Error encoding SMALL (240p) video",status=500)
+                        tmp_small.replace(smallpath)
+                    except subprocess.TimeoutExpired:
+                        print(f"{Fore.RED}[ffmpeg]{Fore.RESET} timed out while encoding small video")
+                        return Response("Error encoding SMALL (240p) video",status=500)
+                    finally:
+                        if tmp_small.exists():
+                            try:
+                                tmp_small.unlink()
+                            except OSError:
+                                self.fixreadonly(tmp_small)
+                    if quality == "tiny":
+                        # get 144p video from 240p video
+                        if self.debugmode:
+                            print(f"{Fore.BLUE}[dl+encode]{Fore.RESET} Encoding tiny (144p) video from small (240p) video...")
+                        tmp_tiny = self.videocache/f"bt3ds_{videoId}_tiny.{uuid.uuid4().hex}.tmp.mp4"
+                        orientation = self.getVideoOrientation(smallpath)
+                        scale = self.getScale(orientation, "tiny")
+                        cmd = [
+                            "ffmpeg",
+                            "-y",
+                            "-nostdin",
+                            "-hide_banner",
+                            "-i", str(smallpath),
+                            "-vf", scale,
+                            "-c:v", "libx264",
+                            "-profile:v", "baseline",
+                            "-level:v", "3.0",
+                            "-preset", "veryfast",
+                            "-b:v", "120k",
+                            "-pix_fmt", "yuv420p",
+                            "-c:a", "copy",
+                            "-movflags", "+faststart",
+                            "-g", "30",
+                            str(tmp_tiny),
+                        ]
+                        try:
+                            proc = subprocess.run(
+                                cmd,
+                                stdout=stdout,
+                                stderr=stderr,
+                                text=True,
+                                timeout=240
+                            )
+                            if self.debugmode:
+                                print(f"{Fore.YELLOW}[ffmpeg]{Fore.RESET} stdout: {proc.stdout}")
+                            if proc.returncode != 0:
+                                if self.debugmode:
+                                    print(f"{Fore.YELLOW}[ffmpeg]{Fore.RESET} stderr: {proc.stderr}")
+                                    print(f"{Fore.RED}[dl+encode]{Fore.RESET} error encoding tiny (144p) video (see above for stderr)")
+                                return Response("Error encoding TINY (144p) video",status=500)
+                            tmp_tiny.replace(tinypath)
+                        except subprocess.TimeoutExpired:
+                            print(f"{Fore.RED}[ffmpeg]{Fore.RESET} timed out while encoding tiny video")
+                            return Response("Error encoding TINY (144p) video",status=500)
+                        finally:
+                            if tmp_tiny.exists():
+                                try:
+                                    tmp_tiny.unlink()
+                                except OSError:
+                                    self.fixreadonly(tmp_tiny)
+        if targetpath.exists():
             print(f"{Fore.BLUE}[dl+encode]{Fore.RESET} Done! returning Range...")
-        return self.sendFileRange(str(tinypath),mime="video/mp4")
+            return self.sendFileRange(targetpath,mime="video/mp4")
+        # should never happen
+        return Response("Error encoding video",status=500)
     def getVideo(self,videoId:str,country:str,lang:str,quality:t.Literal["tiny","small"],model:t.Literal["3ds","new3ds","unk"]="unk",vendor:t.Literal["NINTENDO","UNKNOWN"]="UNKNOWN") -> Response:
         vendors = ["NINTENDO"]
         models = ["3ds","new3ds"]
