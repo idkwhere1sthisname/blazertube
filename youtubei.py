@@ -697,8 +697,12 @@ class InnerTubeAPI:
         return ids[i] if len(ids) > i else None
     @staticmethod
     def _get_oauth_client_secret(initial,alt:bool=False):
-        secret = re.findall(r'A\s*:\s*["\']([^"\']+)["\']',initial)
+        secret = re.findall(r'u\s*:\s*["\']([^"\']+)["\']',initial)
         i = 1 if alt else 0
+        if not len(secret) > i:
+            if alt:
+                return "ju2WuMJMOjilz_h_1dPgFdeU"
+            return "SboVhoG9s0rNafixCSGGKXAT"
         return secret[i] if len(secret) > i else None
     def _get_innertube_client_pair(self,initial,alt:bool=False):
         return (
